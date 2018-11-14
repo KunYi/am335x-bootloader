@@ -54,4 +54,10 @@ config K3_AM654_DDRSS
 	  config add support for the initialization of the external
 	  SDRAM devices connected to DDR subsystem.
 
+config K3_J721E_DDRSS
+	bool "Enable J721E DDRSS support"
+	depends on RAM && SOC_K3_J721E
+	help
+	  DDR driver on J721E SoC.
+
 source "drivers/ram/stm32mp1/Kconfig"
