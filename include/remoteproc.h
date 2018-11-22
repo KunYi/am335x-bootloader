@@ -63,6 +63,10 @@ struct dm_rproc_uclass_pdata {
  *		Return 0 on success, 1 if not running, -ve on others errors
  * @ping:	Ping the remote device for basic communication check(optional)
  *		Return 0 on success, 1 if not responding, -ve on other errors
+ * @da_to_va:	Hook to perform address translations while loading(optional)
+ *			da- Destination load addr as specified in the image
+ *			size- size of the image/section.
+ *		Return virtual address on success else NULL.
  */
 struct dm_rproc_ops {
 	int (*init)(struct udevice *dev);
@@ -72,6 +76,7 @@ struct dm_rproc_ops {
 	int (*reset)(struct udevice *dev);
 	int (*is_running)(struct udevice *dev);
 	int (*ping)(struct udevice *dev);
+	void * (*da_to_va)(struct udevice *dev, ulong da, ulong size);
 };
 
 /* Accessor */
@@ -156,6 +161,29 @@ int rproc_ping(int id);
  * Return: 0 if all ok, else appropriate error value.
  */
 int rproc_is_running(int id);
+
+/**
+ * rproc_elf_load_segments() - Load elf segments of the respective firmwares
+ * @dev:	udevice pointer of the remoteproc
+ * @addr:	Address where the elf firmware is to be fetced in RAM
+ * @size:	size of the firmware
+ *
+ * Return: 0 if all ok, else appropriate error value.
+ */
+int rproc_elf_load_segments(struct udevice *dev, ulong addr, ulong size);
+
+/**
+ * rproc_elf_get_boot_addr() - Get rproc's boot address.
+ * @dev:	udevice pointer of the remoteproc
+ * @addr:	Address where the elf firmware is loaded
+ *
+ * This function returns the entry point address of the ELF
+ * image.
+ *
+ * Note that the boot address is not a configurable property of all remote
+ * processors. Some will always boot at a specific hard-coded address.
+ */
+ulong rproc_elf_get_boot_addr(struct udevice *dev, ulong addr);
 #else
 static inline int rproc_init(void) { return -ENOSYS; }
 static inline int rproc_dev_init(int id) { return -ENOSYS; }
@@ -166,6 +194,11 @@ static inline int rproc_stop(int id) { return -ENOSYS; }
 static inline int rproc_reset(int id) { return -ENOSYS; }
 static inline int rproc_ping(int id) { return -ENOSYS; }
 static inline int rproc_is_running(int id) { return -ENOSYS; }
+static inline int rproc_elf_load_segments(struct udevice *dev, ulong addr,
+					  ulong size)
+	{ return -ENOSYS; }
+static inline ulong rproc_elf_get_boot_addr(struct udevice *dev, ulong addr)
+	{ return -ENOSYS; }
 #endif
 
 #endif	/* _RPROC_H_ */
