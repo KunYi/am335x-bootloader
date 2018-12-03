@@ -61,6 +61,9 @@ struct driver_info;
  */
 #define DM_FLAG_OS_PREPARE		(1 << 10)
 
+/* DM does not enable the power domain of the device */
+#define DM_FLAG_DEFAULT_PD_EN_OFF	(1 << 11)
+
 /*
  * One or multiple of these flags are passed to device_remove() so that
  * a selective device removal as specified by the remove-stage and the
