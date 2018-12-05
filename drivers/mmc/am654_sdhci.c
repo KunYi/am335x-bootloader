@@ -13,9 +13,13 @@
 #include <regmap.h>
 #include <sdhci.h>
 #include "mmc_private.h"
+#if defined(CONFIG_SPL_BUILD) && defined(CONFIG_ARCH_K3)
+#include <spl.h>
+#endif
 
 /* CTL_CFG Registers */
 #define CTL_CFG_2		0x14
+#define K3_ARASAN_SDHCI_MIN_FREQ	0
 
 #define SLOTTYPE_MASK		GENMASK(31, 30)
 #define SLOTTYPE_EMBEDDED	BIT(30)
@@ -292,6 +296,34 @@ static int am654_sdhci_probe(struct udevice *dev)
 	struct clk clk;
 	unsigned long clock;
 	int ret;
+
+#if defined(CONFIG_SPL_BUILD) && defined(CONFIG_ARCH_K3)
+	u32 boot_device;
+	int mmc_dev_index;
+
+	boot_device = spl_boot_device();
+
+	/* Get index of MMC boot device */
+	mmc_dev_index = spl_mmc_get_device_index(boot_device);
+	if (mmc_dev_index < 0)
+		return mmc_dev_index;
+
+	/*
+	 * Only perform SDHCI controller probe for boot device. Note that while
+	 * we would like to use DTS aliases to explicitly define the SDHCI
+	 * controller sequence numbers doing so is currently not well supported
+	 * within U-Boot for our device use case where the sdhci0 and sdhci1
+	 * controllers are declared in the DTS file using the *exact* same name,
+	 * causing issues during dev_read_alias_seq() processing. Hence for now
+	 * we simply rely on the order in which the controllers are declared in
+	 * the DTS file establishing the device sequence numbers.
+	 */
+	if (dev->seq != mmc_dev_index) {
+		debug("%s: skipping probe of non-boot MMC device %d\n",
+		      __func__, dev->seq);
+		return 0;
+	}
+#endif
 
 	ret = power_domain_get_by_index(dev, &sdhci_pwrdmn, 0);
 	if (!ret) {
