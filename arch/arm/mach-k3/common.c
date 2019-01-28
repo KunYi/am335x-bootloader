@@ -180,3 +180,9 @@ int fdt_disable_node(void *blob, char *node_path)
 }
 
 #endif
+
+#ifndef CONFIG_SYSRESET
+void reset_cpu(ulong ignored)
+{
+}
+#endif

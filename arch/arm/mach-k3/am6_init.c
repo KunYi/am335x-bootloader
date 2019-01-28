@@ -309,9 +309,3 @@ void release_resources_for_core_shutdown(void)
 	}
 }
 #endif
-
-#ifndef CONFIG_SYSRESET
-void reset_cpu(ulong ignored)
-{
-}
-#endif
