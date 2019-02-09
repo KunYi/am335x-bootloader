@@ -133,8 +133,12 @@ __weak void start_non_linux_remote_cores(void)
 void __noreturn jump_to_image_no_args(struct spl_image_info *spl_image)
 {
 	typedef void __noreturn (*image_entry_noargs_t)(void);
+	struct ti_sci_handle *ti_sci = get_ti_sci_handle();
 	u32 loadaddr = 0;
 	int ret, size;
+
+	/* Release all the exclusive devices held by SPL before starting ATF */
+	ti_sci->ops.dev_ops.release_exclusive_devices(ti_sci);
 
 	ret = rproc_init();
 	if (ret)
