@@ -87,6 +87,8 @@
 	"mmcdev=1\0"							\
 	"bootpart=1:2\0"						\
 	"bootdir=/boot\0"						\
+	"mainr5f0_0loadaddr=88000000\0"					\
+	"mainr5f0_0fwname=/lib/firmware/j7-main-r5f0_0-fw\0"		\
 	"rd_spec=-\0"							\
 	"init_mmc=run args_all args_mmc\0"				\
 	"get_fdt_mmc=load mmc ${bootpart} ${fdtaddr} ${bootdir}/${fdtfile}\0" \
