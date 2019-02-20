@@ -10,7 +10,7 @@
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/phy/phy.h>
 #include <dt-bindings/phy/phy-am654-serdes.h>
-#include <dt-bindings/pinctrl/k3-am65.h>
+#include <dt-bindings/pinctrl/k3.h>
 
 &serdes0 {
 	assigned-clocks = <&k3_clks 153 4>, <&serdes0 AM654_SERDES_CMU_REFCLK>, <&serdes0 AM654_SERDES_RO_REFCLK>;

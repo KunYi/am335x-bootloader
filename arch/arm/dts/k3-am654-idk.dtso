@@ -11,7 +11,7 @@
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/net/ti-dp83867.h>
 #include <dt-bindings/phy/phy.h>
-#include <dt-bindings/pinctrl/k3-am65.h>
+#include <dt-bindings/pinctrl/k3.h>
 
 / {
    fragment@101 {

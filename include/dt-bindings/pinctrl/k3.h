@@ -1,11 +1,12 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
- * This header provides constants for TI K3-AM65 pinctrl bindings.
+ * This header provides constants for pinctrl bindings for TI's K3 SoC
+ * family.
  *
  * Copyright (C) 2018 Texas Instruments
  */
-#ifndef _DT_BINDINGS_PINCTRL_TI_K3_AM65_H
-#define _DT_BINDINGS_PINCTRL_TI_K3_AM65_H
+#ifndef _DT_BINDINGS_PINCTRL_TI_K3_H
+#define _DT_BINDINGS_PINCTRL_TI_K3_H
 
 #define PULL_DISABLE		(1 << 16)
 #define PULL_UP			(1 << 17)

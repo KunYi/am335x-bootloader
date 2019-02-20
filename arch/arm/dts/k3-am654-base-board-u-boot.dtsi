@@ -3,7 +3,7 @@
  * Copyright (C) 2018 Texas Instruments Incorporated - http://www.ti.com/
  */
 
-#include <dt-bindings/pinctrl/k3-am65.h>
+#include <dt-bindings/pinctrl/k3.h>
 #include <dt-bindings/dma/k3-udma.h>
 #include <dt-bindings/net/ti-dp83867.h>
 
