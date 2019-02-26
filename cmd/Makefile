@@ -51,7 +51,6 @@ obj-$(CONFIG_CMD_ECHO) += echo.o
 obj-$(CONFIG_ENV_IS_IN_EEPROM) += eeprom.o
 obj-$(CONFIG_CMD_EEPROM) += eeprom.o
 obj-$(CONFIG_EFI_STUB) += efi.o
-obj-$(CONFIG_CMD_ELF) += elf.o
 obj-$(CONFIG_HUSH_PARSER) += exit.o
 obj-$(CONFIG_CMD_EXT4) += ext4.o
 obj-$(CONFIG_CMD_EXT2) += ext2.o
@@ -178,6 +177,7 @@ endif # !CONFIG_SPL_BUILD
 # core command
 obj-y += nvedit.o
 
+obj-$(CONFIG_CMD_ELF) += elf.o
 obj-$(CONFIG_TI_COMMON_CMD_OPTIONS) += ti/
 
 filechk_data_gz = (echo "static const char data_gz[] ="; cat $< | scripts/bin2c; echo ";")
