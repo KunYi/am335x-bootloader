@@ -132,7 +132,9 @@ __weak void start_non_linux_remote_cores(void)
 
 void __noreturn jump_to_image_no_args(struct spl_image_info *spl_image)
 {
-	int ret;
+	typedef void __noreturn (*image_entry_noargs_t)(void);
+	u32 loadaddr = 0;
+	int ret, size;
 
 	ret = rproc_init();
 	if (ret)
@@ -140,6 +142,8 @@ void __noreturn jump_to_image_no_args(struct spl_image_info *spl_image)
 
 	init_env();
 	start_non_linux_remote_cores();
+	size = load_firmware("mcur5f0_0fwname", "mcur5f0_0loadaddr",
+			     &loadaddr);
 
 	/*
 	 * It is assumed that remoteproc device 1 is the corresponding
@@ -156,12 +160,18 @@ void __noreturn jump_to_image_no_args(struct spl_image_info *spl_image)
 	if (ret)
 		panic("%s: ATF failed to start on rproc (%d)\n", __func__, ret);
 
-	debug("Releasing resources...\n");
-	release_resources_for_core_shutdown();
+	if (!(size > 0 && valid_elf_image(loadaddr))) {
+		debug("Shutting down...\n");
+		release_resources_for_core_shutdown();
 
-	debug("Finalizing core shutdown...\n");
-	while (1)
-		asm volatile("wfe");
+		while (1)
+			asm volatile("wfe");
+	}
+
+	image_entry_noargs_t image_entry =
+		(image_entry_noargs_t)load_elf_image_phdr(loadaddr);
+
+	image_entry();
 }
 #endif
 
