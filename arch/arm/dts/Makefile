@@ -570,6 +570,8 @@ dtb-$(CONFIG_TARGET_STM32MP1) += \
 
 dtb-$(CONFIG_SOC_K3_AM6) += k3-am654-base-board.dtb k3-am654-r5-base-board.dtb \
 		k3-am654-pcie-usb2.dtbo k3-am654-idk.dtbo
+dtb-$(CONFIG_SOC_K3_J721E) += k3-j721e-common-proc-board.dtb
+
 
 dtb-$(CONFIG_ARCH_MEDIATEK) += \
 	mt7623n-bananapi-bpi-r2.dtb \
