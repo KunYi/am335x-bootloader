@@ -11,6 +11,8 @@
 	aliases {
 		remoteproc0 = &sysctrler;
 		remoteproc1 = &a72_0;
+		remoteproc2 = &main_r5fss0_core0;
+		remoteproc3 = &main_r5fss0_core1;
 	};
 
 	chosen {
@@ -166,6 +168,18 @@
 	pinctrl-0 = <&wkup_i2c0_pins_default>;
 	clock-frequency = <400000>;
 	power-domains = <&k3_pds 197>;
+	u-boot,dm-spl;
+};
+
+&main_r5fss0 {
+	u-boot,dm-spl;
+};
+
+&main_r5fss0_core0 {
+	u-boot,dm-spl;
+};
+
+&main_r5fss0_core1 {
 	u-boot,dm-spl;
 };
 
