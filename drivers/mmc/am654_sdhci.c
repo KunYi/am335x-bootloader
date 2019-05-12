@@ -214,14 +214,7 @@ static int am654_sdhci_set_ios_post(struct sdhci_host *host)
 		mask = SEL50_MASK | SEL100_MASK;
 		val = (sel50 << SEL50_SHIFT) | (sel100 << SEL100_SHIFT);
 		regmap_update_bits(plat->base, PHY_CTRL5, mask, val);
-		/* Configure DLL TRIM */
-		mask = DLL_TRIM_ICP_MASK;
-		val = plat->trm_icp << DLL_TRIM_ICP_SHIFT;
 
-		/* Configure DLL driver strength */
-		mask |= DR_TY_MASK;
-		val |= plat->drv_strength << DR_TY_SHIFT;
-		regmap_update_bits(plat->base, PHY_CTRL1, mask, val);
 		/* Enable DLL */
 		regmap_update_bits(plat->base, PHY_CTRL1, ENDLL_MASK,
 				   0x1 << ENDLL_SHIFT);
@@ -265,6 +258,15 @@ int am654_sdhci_init(struct am654_sdhci_plat *plat)
 		if (ret)
 			return ret;
 	}
+
+	/* Configure DLL TRIM */
+	mask = DLL_TRIM_ICP_MASK;
+	val = plat->trm_icp << DLL_TRIM_ICP_SHIFT;
+
+	/* Configure DLL driver strength */
+	mask |= DR_TY_MASK;
+	val |= plat->drv_strength << DR_TY_SHIFT;
+	regmap_update_bits(plat->base, PHY_CTRL1, mask, val);
 
 	/* Enable pins by setting IO mux to 0 */
 	regmap_update_bits(plat->base, PHY_CTRL1, IOMUX_ENABLE_MASK, 0);
