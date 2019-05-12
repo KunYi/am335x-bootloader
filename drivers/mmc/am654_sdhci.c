@@ -195,8 +195,7 @@ static int am654_sdhci_set_ios_post(struct sdhci_host *host)
 		mask = OTAPDLYENA_MASK | OTAPDLYSEL_MASK;
 		val = (1 << OTAPDLYENA_SHIFT) |
 		      (plat->otap_del_sel << OTAPDLYSEL_SHIFT);
-		regmap_update_bits(plat->base, PHY_CTRL4,
-				   mask, val);
+		regmap_update_bits(plat->base, PHY_CTRL4, mask, val);
 		switch (speed) {
 		case 200000000:
 			sel50 = 0;
@@ -214,8 +213,7 @@ static int am654_sdhci_set_ios_post(struct sdhci_host *host)
 		/* Configure PHY DLL frequency */
 		mask = SEL50_MASK | SEL100_MASK;
 		val = (sel50 << SEL50_SHIFT) | (sel100 << SEL100_SHIFT);
-		regmap_update_bits(plat->base, PHY_CTRL5,
-				   mask, val);
+		regmap_update_bits(plat->base, PHY_CTRL5, mask, val);
 		/* Configure DLL TRIM */
 		mask = DLL_TRIM_ICP_MASK;
 		val = plat->trm_icp << DLL_TRIM_ICP_SHIFT;
@@ -223,19 +221,16 @@ static int am654_sdhci_set_ios_post(struct sdhci_host *host)
 		/* Configure DLL driver strength */
 		mask |= DR_TY_MASK;
 		val |= plat->drv_strength << DR_TY_SHIFT;
-		regmap_update_bits(plat->base, PHY_CTRL1,
-				   mask, val);
+		regmap_update_bits(plat->base, PHY_CTRL1, mask, val);
 		/* Enable DLL */
-		regmap_update_bits(plat->base, PHY_CTRL1,
-				   ENDLL_MASK, 0x1 << ENDLL_SHIFT);
+		regmap_update_bits(plat->base, PHY_CTRL1, ENDLL_MASK,
+				   0x1 << ENDLL_SHIFT);
 		/*
 		 * Poll for DLL ready. Use a one second timeout.
 		 * Works in all experiments done so far
 		 */
-		ret = regmap_read_poll_timeout(plat->base,
-					 PHY_STAT1, val,
-					 val & DLLRDY_MASK,
-					 1000, 1000000);
+		ret = regmap_read_poll_timeout(plat->base, PHY_STAT1, val,
+					 val & DLLRDY_MASK, 1000, 1000000);
 		if (ret)
 			return ret;
 
@@ -264,11 +259,9 @@ int am654_sdhci_init(struct am654_sdhci_plat *plat)
 	regmap_read(plat->base, PHY_STAT1, &val);
 	if (~val & CALDONE_MASK) {
 		/* Calibrate IO lines */
-		regmap_update_bits(plat->base, PHY_CTRL1,
-				   PDB_MASK, PDB_MASK);
-		ret = regmap_read_poll_timeout(plat->base, PHY_STAT1,
-					       val, val & CALDONE_MASK,
-					       1, 20);
+		regmap_update_bits(plat->base, PHY_CTRL1, PDB_MASK, PDB_MASK);
+		ret = regmap_read_poll_timeout(plat->base, PHY_STAT1, val,
+					       val & CALDONE_MASK, 1, 20);
 		if (ret)
 			return ret;
 	}
@@ -280,8 +273,7 @@ int am654_sdhci_init(struct am654_sdhci_plat *plat)
 	if (plat->non_removable)
 		ctl_cfg_2 = SLOTTYPE_EMBEDDED;
 
-	regmap_update_bits(plat->base, CTL_CFG_2, SLOTTYPE_MASK,
-			   ctl_cfg_2);
+	regmap_update_bits(plat->base, CTL_CFG_2, SLOTTYPE_MASK, ctl_cfg_2);
 
 	return 0;
 }
