@@ -101,6 +101,20 @@ void board_init_f(ulong dummy)
 	/* Init DM early */
 	spl_early_init();
 
+#ifdef CONFIG_K3_EARLY_CONS
+	/*
+	 * Allow establishing an early console as required for example when
+	 * doing a UART-based boot. Note that this console may not "survive"
+	 * through a SYSFW PM-init step and will need a re-init in some way
+	 * due to changing module clock frequencies.
+	 */
+	switch (spl_boot_device()) {
+	case BOOT_DEVICE_UART:
+		early_console_init();
+		break;
+	}
+#endif
+
 #ifdef CONFIG_K3_LOAD_SYSFW
 	/*
 	 * Process pinctrl for the serial0 a.k.a. MCU_UART0 module and continue
