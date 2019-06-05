@@ -139,11 +139,6 @@ static int do_remoteproc_load(cmd_tbl_t *cmdtp, int flag, int argc,
 		return CMD_RET_USAGE;
 	}
 
-	if (!rproc_is_initialized()) {
-		printf("\tRemote Processors are not initialized\n");
-		return CMD_RET_USAGE;
-	}
-
 	ret = rproc_load(id, addr, size);
 	printf("Load Remote Processor %d with data@addr=0x%08lx %lu bytes:%s\n",
 	       id, addr, size, ret ? " Failed!" : " Success!");
@@ -173,11 +168,6 @@ static int do_remoteproc_wrapper(cmd_tbl_t *cmdtp, int flag, int argc,
 		return CMD_RET_USAGE;
 
 	id = (int)simple_strtoul(argv[1], NULL, 10);
-
-	if (!rproc_is_initialized()) {
-		printf("\tRemote Processors are not initialized\n");
-		return CMD_RET_USAGE;
-	}
 
 	if (!strcmp(argv[0], "start")) {
 		ret = rproc_start(id);
