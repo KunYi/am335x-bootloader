@@ -336,4 +336,9 @@
 	u-boot,dm-spl;
 };
 
+&wkup_vtm0 {
+	vdd-supply-2 = <&smps12_reg>;
+	u-boot,dm-spl;
+};
+
 #include "k3-j721e-common-proc-board-u-boot.dtsi"
