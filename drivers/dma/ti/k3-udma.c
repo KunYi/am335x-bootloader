@@ -11,12 +11,14 @@
 #include <malloc.h>
 #include <asm/dma-mapping.h>
 #include <dm.h>
+#include <dm/device.h>
 #include <dm/read.h>
 #include <dm/of_access.h>
 #include <dma.h>
 #include <dma-uclass.h>
 #include <linux/delay.h>
 #include <dt-bindings/dma/k3-udma.h>
+#include <linux/bitmap.h>
 #include <linux/soc/ti/k3-navss-ringacc.h>
 #include <linux/soc/ti/cppi5.h>
 #include <linux/soc/ti/ti-udma.h>
@@ -29,6 +31,8 @@
 #else
 #define RINGACC_RING_USE_PROXY	(1)
 #endif
+
+#define K3_UDMA_MAX_RFLOWS 1024
 
 struct udma_chan;
 
@@ -64,9 +68,10 @@ struct udma_rflow {
 };
 
 struct udma_dev {
-	struct device *dev;
+	struct udevice *dev;
 	void __iomem *mmrs[MMR_LAST];
 
+	struct udma_tisci_rm tisci_rm;
 	struct k3_nav_ringacc *ringacc;
 
 	u32 features;
@@ -78,6 +83,7 @@ struct udma_dev {
 	unsigned long *tchan_map;
 	unsigned long *rchan_map;
 	unsigned long *rflow_map;
+	unsigned long *rflow_map_reserved;
 
 	struct udma_tchan *tchans;
 	struct udma_rchan *rchans;
@@ -535,6 +541,28 @@ static void udma_poll_completion(struct udma_chan *uc, dma_addr_t *paddr)
 	}
 }
 
+static struct udma_rflow *__udma_reserve_rflow(struct udma_dev *ud, int id)
+{
+	DECLARE_BITMAP(tmp, K3_UDMA_MAX_RFLOWS);
+
+	if (id >= 0) {
+		if (test_bit(id, ud->rflow_map)) {
+			dev_err(ud->dev, "rflow%d is in use\n", id);
+			return ERR_PTR(-ENOENT);
+		}
+	} else {
+		bitmap_or(tmp, ud->rflow_map, ud->rflow_map_reserved,
+			  ud->rflow_cnt);
+
+		id = find_next_zero_bit(tmp, ud->rflow_cnt, ud->rchan_cnt);
+		if (id >= ud->rflow_cnt)
+			return ERR_PTR(-ENOENT);
+	}
+
+	__set_bit(id, ud->rflow_map);
+	return &ud->rflows[id];
+}
+
 #define UDMA_RESERVE_RESOURCE(res)					\
 static struct udma_##res *__udma_reserve_##res(struct udma_dev *ud,	\
 					       int id)			\
@@ -557,7 +585,6 @@ static struct udma_##res *__udma_reserve_##res(struct udma_dev *ud,	\
 
 UDMA_RESERVE_RESOURCE(tchan);
 UDMA_RESERVE_RESOURCE(rchan);
-UDMA_RESERVE_RESOURCE(rflow);
 
 static int udma_get_tchan(struct udma_chan *uc)
 {
@@ -1103,14 +1130,129 @@ static int udma_get_mmrs(struct udevice *dev)
 	return 0;
 }
 
-#define UDMA_MAX_CHANNELS	192
+static int udma_setup_resources(struct udma_dev *ud)
+{
+	struct udevice *dev = ud->dev;
+	int ch_count, i;
+	u32 cap2, cap3;
+	struct ti_sci_resource_desc *rm_desc;
+	struct ti_sci_resource *rm_res;
+	struct udma_tisci_rm *tisci_rm = &ud->tisci_rm;
+	static const char * const range_names[] = { "ti,sci-rm-range-tchan",
+						    "ti,sci-rm-range-rchan",
+						    "ti,sci-rm-range-rflow" };
 
+	cap2 = udma_read(ud->mmrs[MMR_GCFG], 0x28);
+	cap3 = udma_read(ud->mmrs[MMR_GCFG], 0x2c);
+
+	ud->rflow_cnt = cap3 & 0x3fff;
+	ud->tchan_cnt = cap2 & 0x1ff;
+	ud->echan_cnt = (cap2 >> 9) & 0x1ff;
+	ud->rchan_cnt = (cap2 >> 18) & 0x1ff;
+	ch_count  = ud->tchan_cnt + ud->rchan_cnt;
+
+	ud->tchan_map = devm_kmaloc_array(dev, BITS_TO_LONGS(ud->tchan_cnt),
+					  sizeof(unsigned long), GFP_KERNEL);
+	ud->tchans = devm_kcalloc(dev, ud->tchan_cnt, sizeof(*ud->tchans),
+				  GFP_KERNEL);
+	ud->rchan_map = devm_kmaloc_array(dev, BITS_TO_LONGS(ud->rchan_cnt),
+					  sizeof(unsigned long), GFP_KERNEL);
+	ud->rchans = devm_kcalloc(dev, ud->rchan_cnt, sizeof(*ud->rchans),
+				  GFP_KERNEL);
+	ud->rflow_map = devm_kmaloc_array(dev, BITS_TO_LONGS(ud->rflow_cnt),
+					  sizeof(unsigned long), GFP_KERNEL);
+	ud->rflow_map_reserved = devm_kcalloc(dev, BITS_TO_LONGS(ud->rflow_cnt),
+					      sizeof(unsigned long),
+					      GFP_KERNEL);
+	ud->rflows = devm_kcalloc(dev, ud->rflow_cnt, sizeof(*ud->rflows),
+				  GFP_KERNEL);
+
+	if (!ud->tchan_map || !ud->rchan_map || !ud->rflow_map ||
+	    !ud->rflow_map_reserved || !ud->tchans || !ud->rchans ||
+	    !ud->rflows)
+		return -ENOMEM;
+
+	/*
+	 * RX flows with the same Ids as RX channels are reserved to be used
+	 * as default flows if remote HW can't generate flow_ids. Those
+	 * RX flows can be requested only explicitly by id.
+	 */
+	bitmap_set(ud->rflow_map_reserved, 0, ud->rchan_cnt);
+
+	/* Get resource ranges from tisci */
+	for (i = 0; i < RM_RANGE_LAST; i++)
+		tisci_rm->rm_ranges[i] =
+			devm_ti_sci_get_of_resource(ud->tisci, dev,
+						    ud->tisci_dev_id,
+						    (char *)range_names[i]);
+
+	/* tchan ranges */
+	rm_res = tisci_rm->rm_ranges[RM_RANGE_TCHAN];
+	if (IS_ERR(rm_res)) {
+		bitmap_zero(ud->tchan_map, ud->tchan_cnt);
+	} else {
+		bitmap_fill(ud->tchan_map, ud->tchan_cnt);
+		for (i = 0; i < rm_res->sets; i++) {
+			rm_desc = &rm_res->desc[i];
+			bitmap_clear(ud->tchan_map, rm_desc->start,
+				     rm_desc->num);
+		}
+	}
+
+	/* rchan and matching default flow ranges */
+	rm_res = tisci_rm->rm_ranges[RM_RANGE_RCHAN];
+	if (IS_ERR(rm_res)) {
+		bitmap_zero(ud->rchan_map, ud->rchan_cnt);
+		bitmap_zero(ud->rflow_map, ud->rchan_cnt);
+	} else {
+		bitmap_fill(ud->rchan_map, ud->rchan_cnt);
+		bitmap_fill(ud->rflow_map, ud->rchan_cnt);
+		for (i = 0; i < rm_res->sets; i++) {
+			rm_desc = &rm_res->desc[i];
+			bitmap_clear(ud->rchan_map, rm_desc->start,
+				     rm_desc->num);
+			bitmap_clear(ud->rflow_map, rm_desc->start,
+				     rm_desc->num);
+		}
+	}
+
+	/* GP rflow ranges */
+	rm_res = tisci_rm->rm_ranges[RM_RANGE_RFLOW];
+	if (IS_ERR(rm_res)) {
+		bitmap_clear(ud->rflow_map, ud->rchan_cnt,
+			     ud->rflow_cnt - ud->rchan_cnt);
+	} else {
+		bitmap_set(ud->rflow_map, ud->rchan_cnt,
+			   ud->rflow_cnt - ud->rchan_cnt);
+		for (i = 0; i < rm_res->sets; i++) {
+			rm_desc = &rm_res->desc[i];
+			bitmap_clear(ud->rflow_map, rm_desc->start,
+				     rm_desc->num);
+		}
+	}
+
+	ch_count -= bitmap_weight(ud->tchan_map, ud->tchan_cnt);
+	ch_count -= bitmap_weight(ud->rchan_map, ud->rchan_cnt);
+	if (!ch_count)
+		return -ENODEV;
+
+	ud->channels = devm_kcalloc(dev, ch_count, sizeof(*ud->channels),
+				    GFP_KERNEL);
+	if (!ud->channels)
+		return -ENOMEM;
+
+	dev_info(dev,
+		 "Channels: %d (tchan: %u, echan: %u, rchan: %u, rflow: %u)\n",
+		 ch_count, ud->tchan_cnt, ud->echan_cnt, ud->rchan_cnt,
+		 ud->rflow_cnt);
+
+	return ch_count;
+}
 static int udma_probe(struct udevice *dev)
 {
 	struct dma_dev_priv *uc_priv = dev_get_uclass_priv(dev);
 	struct udma_dev *ud = dev_get_priv(dev);
 	int i, ret;
-	u32 cap2, cap3;
 	struct udevice *tmp;
 	struct udevice *tisci_dev = NULL;
 
@@ -1170,14 +1312,10 @@ static int udma_probe(struct udevice *dev)
 
 	ud->is_coherent = dev_read_bool(dev, "dma-coherent");
 
-	cap2 = udma_read(ud->mmrs[MMR_GCFG], 0x28);
-	cap3 = udma_read(ud->mmrs[MMR_GCFG], 0x2c);
-
-	ud->rflow_cnt = cap3 & 0x3fff;
-	ud->tchan_cnt = cap2 & 0x1ff;
-	ud->echan_cnt = (cap2 >> 9) & 0x1ff;
-	ud->rchan_cnt = (cap2 >> 18) & 0x1ff;
-	ud->ch_count  = ud->tchan_cnt + ud->rchan_cnt;
+	ud->dev = dev;
+	ud->ch_count = udma_setup_resources(ud);
+	if (ud->ch_count <= 0)
+		return ud->ch_count;
 
 	dev_info(dev,
 		 "Number of channels: %u (tchan: %u, echan: %u, rchan: %u dev-id %u)\n",
@@ -1187,21 +1325,8 @@ static int udma_probe(struct udevice *dev)
 
 	ud->channels = devm_kcalloc(dev, ud->ch_count, sizeof(*ud->channels),
 				    GFP_KERNEL);
-	ud->tchan_map = devm_kcalloc(dev, BITS_TO_LONGS(ud->tchan_cnt),
-				     sizeof(unsigned long), GFP_KERNEL);
-	ud->tchans = devm_kcalloc(dev, ud->tchan_cnt,
-				  sizeof(*ud->tchans), GFP_KERNEL);
-	ud->rchan_map = devm_kcalloc(dev, BITS_TO_LONGS(ud->rchan_cnt),
-				     sizeof(unsigned long), GFP_KERNEL);
-	ud->rchans = devm_kcalloc(dev, ud->rchan_cnt,
-				  sizeof(*ud->rchans), GFP_KERNEL);
-	ud->rflow_map = devm_kcalloc(dev, BITS_TO_LONGS(ud->rflow_cnt),
-				     sizeof(unsigned long), GFP_KERNEL);
-	ud->rflows = devm_kcalloc(dev, ud->rflow_cnt,
-				  sizeof(*ud->rflows), GFP_KERNEL);
 
-	if (!ud->channels || !ud->tchan_map || !ud->rchan_map ||
-	    !ud->rflow_map || !ud->tchans || !ud->rchans || !ud->rflows)
+	if (!ud->channels)
 		return -ENOMEM;
 
 	for (i = 0; i < ud->tchan_cnt; i++) {
