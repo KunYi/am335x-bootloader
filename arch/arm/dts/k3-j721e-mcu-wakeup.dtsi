@@ -6,6 +6,14 @@
  */
 
 &cbass_mcu_wakeup {
+	mcu_conf: scm_conf@40f00000 {
+		compatible = "syscon", "simple-mfd";
+		reg = <0x0 0x40f00000 0x0 0x20000>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges = <0x0 0x0 0x40f00000 0x20000>;
+	};
+
 	dmsc: dmsc@44083000 {
 		compatible = "ti,k2g-sci";
 		ti,host-id = <12>;
