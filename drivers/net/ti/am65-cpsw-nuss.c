@@ -99,7 +99,6 @@ struct am65_cpsw_common {
 
 	u32			port_num;
 	struct am65_cpsw_port	ports[AM65_CPSW_CPSWNU_MAX_PORTS];
-	u32			rflow_id_base;
 
 	struct mii_dev		*bus;
 	u32			bus_freq;
@@ -341,7 +340,7 @@ static int am65_cpsw_start(struct udevice *dev)
 	writel(PKTSIZE_ALIGN, port0->port_base + AM65_CPSW_PN_RX_MAXLEN_REG);
 
 	/* set base flow_id */
-	writel(common->rflow_id_base,
+	writel(common->dma_rx.flow_id,
 	       port0->port_base + AM65_CPSW_P0_FLOW_ID_REG);
 
 	/* Reset and enable the ALE */
@@ -671,11 +670,6 @@ static int am65_cpsw_probe_cpsw(struct udevice *dev)
 				AM65_CPSW_CPSW_NU_ALE_BASE;
 	cpsw_common->mdio_base = cpsw_common->ss_base + AM65_CPSW_MDIO_BASE;
 
-	cpsw_common->rflow_id_base = 0;
-	cpsw_common->rflow_id_base =
-			dev_read_u32_default(dev, "ti,rx-flow-id-base",
-					     cpsw_common->rflow_id_base);
-
 	ports_np = dev_read_subnode(dev, "ports");
 	if (!ofnode_valid(ports_np)) {
 		ret = -ENOENT;
@@ -763,12 +757,11 @@ static int am65_cpsw_probe_cpsw(struct udevice *dev)
 	if (ret)
 		goto out;
 
-	dev_info(dev, "K3 CPSW: nuss_ver: 0x%08X cpsw_ver: 0x%08X ale_ver: 0x%08X Ports:%u rflow_id_base:%u mdio_freq:%u\n",
+	dev_info(dev, "K3 CPSW: nuss_ver: 0x%08X cpsw_ver: 0x%08X ale_ver: 0x%08X Ports:%u mdio_freq:%u\n",
 		 readl(cpsw_common->ss_base),
 		 readl(cpsw_common->cpsw_base),
 		 readl(cpsw_common->ale_base),
 		 cpsw_common->port_num,
-		 cpsw_common->rflow_id_base,
 		 cpsw_common->bus_freq);
 
 out:
