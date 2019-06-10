@@ -143,6 +143,9 @@ struct udevice;
  *
  * @dev: The device which implements the DMA channel.
  * @id: The DMA channel ID within the provider.
+ * @flow_id: flow ID within the channel allocated to the slave. This is
+ *           used by certain DMA providers that support ethernet traffic
+ *           segregation
  *
  * Currently, the DMA API assumes that a single integer ID is enough to
  * identify and configure any DMA channel for any DMA provider. If this
@@ -160,6 +163,7 @@ struct dma {
 	 * future, we might add more fields here.
 	 */
 	unsigned long id;
+	unsigned long flow_id;
 };
 
 # if CONFIG_IS_ENABLED(OF_CONTROL) && CONFIG_IS_ENABLED(DMA)
