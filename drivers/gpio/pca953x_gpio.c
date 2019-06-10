@@ -116,7 +116,7 @@ static int pca953x_read_regs(struct udevice *dev, int reg, u8 *val)
 
 	if (info->gpio_count <= 8) {
 		ret = dm_i2c_read(dev, reg, val, 1);
-	} else if (info->gpio_count <= 16) {
+	} else if (info->gpio_count <= 24) {
 		ret = dm_i2c_read(dev, reg << 1, val, info->bank_count);
 	} else if (info->gpio_count == 40) {
 		/* Auto increment */
@@ -137,7 +137,7 @@ static int pca953x_write_regs(struct udevice *dev, int reg, u8 *val)
 
 	if (info->gpio_count <= 8) {
 		ret = dm_i2c_write(dev, reg, val, 1);
-	} else if (info->gpio_count <= 16) {
+	} else if (info->gpio_count <= 24) {
 		ret = dm_i2c_write(dev, reg << 1, val, info->bank_count);
 	} else if (info->gpio_count == 40) {
 		/* Auto increment */
