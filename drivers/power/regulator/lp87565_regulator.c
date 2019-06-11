@@ -81,10 +81,30 @@ static int lp87565_buck_val2volt(int val)
 		return -EINVAL;
 }
 
+int lp87565_lookup_slew(int id)
+{
+	switch (id) {
+	case 2:
+		return 10000;
+	case 3:
+		return 7500;
+	case 4:
+		return 3800;
+	case 5:
+		return 1900;
+	case 6:
+		return 940;
+	case 7:
+		return 470;
+	default:
+		return -1;
+	}
+}
+
 static int lp87565_buck_val(struct udevice *dev, int op, int *uV)
 {
 	unsigned int hex, adr;
-	int ret;
+	int ret, delta, uwait, slew;
 	struct dm_regulator_uclass_platdata *uc_pdata;
 
 	uc_pdata = dev_get_uclass_platdata(dev);
@@ -98,15 +118,35 @@ static int lp87565_buck_val(struct udevice *dev, int op, int *uV)
 	if (ret < 0)
 		return ret;
 
-	if (op == PMIC_OP_GET) {
-		ret &= LP87565_BUCK_VOLT_MASK;
-		ret = lp87565_buck_val2volt(ret);
-		if (ret < 0)
-			return ret;
-		*uV = ret;
+	ret &= LP87565_BUCK_VOLT_MASK;
+	ret = lp87565_buck_val2volt(ret);
+	if (ret < 0)
+		return ret;
 
+	if (op == PMIC_OP_GET) {
+		*uV = ret;
 		return 0;
 	}
+
+	/*
+	 * Compute the delta voltage, find the slew rate and wait
+	 * for the appropriate amount of time after voltage switch
+	 */
+	if (*uV > ret)
+		delta = *uV - ret;
+	else
+		delta = ret - *uV;
+
+	slew = pmic_reg_read(dev->parent, uc_pdata->ctrl_reg + 1);
+	if (slew < 0)
+		return ret;
+
+	slew &= LP87565_BUCK_CTRL2_SLEW_MASK;
+	slew = lp87565_lookup_slew(slew);
+	if (slew <= 0)
+		return ret;
+
+	uwait = delta / slew;
 
 	hex = lp87565_buck_volt2val(*uV);
 	if (hex < 0)
@@ -116,6 +156,8 @@ static int lp87565_buck_val(struct udevice *dev, int op, int *uV)
 	ret = hex;
 
 	ret = pmic_reg_write(dev->parent, adr, ret);
+
+	udelay(uwait);
 
 	return ret;
 }
