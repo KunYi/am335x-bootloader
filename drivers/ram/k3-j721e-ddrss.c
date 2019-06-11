@@ -1711,10 +1711,9 @@ static int j721e_ddrss_ofdata_to_priv(struct udevice *dev)
 static int j721e_ddrss_probe(struct udevice *dev)
 {
 	struct j721e_ddrss_desc *ddrss = dev_get_priv(dev);
-	struct udevice *i2c_dev, *rdev;
+	struct udevice *rdev;
 	int ret;
 
-	printf("Before j721e_ddrss_probe device_get_supply_regulator\n");
 	ret = device_get_supply_regulator(dev, "core-supply", &rdev);
 	if (ret)
 		printf("%s: No core supply\n", rdev->name);
@@ -1733,19 +1732,6 @@ static int j721e_ddrss_probe(struct udevice *dev)
 	ret = j721e_ddrss_power_on(ddrss);
 	if (ret)
 		return ret;
-
-	/* HACK: Bump up the core voltage to 0.9V */
-	ret = i2c_get_chip_for_busnum(0x0, 0x61, 1, &i2c_dev);
-	if (ret) {
-		printf("%s: i2c get chip for ddr regulator failed\n", __func__);
-		return ret;
-	}
-
-	ret = dm_i2c_reg_write(i2c_dev, 0xa, 0x39);
-	if (ret) {
-		printf("%s: ddr regulator update failed\n", __func__);
-		return ret;
-	}
 
 	ret = j721e_ddrss_init(ddrss);
 
