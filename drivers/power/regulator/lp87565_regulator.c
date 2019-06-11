@@ -177,6 +177,8 @@ static int lp87565_buck_probe(struct udevice *dev)
 		idx = 5;
 	} else if (idx == 10) {
 		idx = 4;
+	} else if (idx == 3210) {
+		idx = 4;
 	} else {
 		printf("Wrong ID for regulator\n");
 		return -EINVAL;
