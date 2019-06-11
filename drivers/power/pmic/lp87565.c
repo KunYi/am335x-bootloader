@@ -72,6 +72,7 @@ static struct dm_pmic_ops lp87565_ops = {
 static const struct udevice_id lp87565_ids[] = {
 	{ .compatible = "ti,lp87565", .data = LP87565 },
 	{ .compatible = "ti,lp87565-q1", .data = LP87565_Q1 },
+	{ .compatible = "ti,lp87561-q1", .data = LP87561_Q1 },
 	{ }
 };
 

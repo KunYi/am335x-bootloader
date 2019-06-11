@@ -1,5 +1,6 @@
 #define LP87565	0x0
 #define LP87565_Q1	0x1
+#define LP87561_Q1	0x2
 
 #define LP87565_BUCK_NUM		6
 
