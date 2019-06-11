@@ -53,6 +53,7 @@
 		power-domains = <&k3_pds 47 TI_SCI_PD_SHARED>,
 				<&k3_pds 90 TI_SCI_PD_SHARED>;
 		clocks = <&k3_clks 47 2>;
+		core-supply = <&buck3210_reg>;
 
 		u-boot,dm-spl;
 	};
@@ -326,6 +327,26 @@
 					regulator-boot-on;
 					u-boot,dm-spl;
 				};
+			};
+		};
+	};
+
+	lp87561: lp87561@61 {
+		compatible = "ti,lp87561-q1";
+		reg = <0x61>;
+		u-boot,dm-spl;
+
+		buck3210-in-supply =<&vsys_3v3>;
+
+		regulators: regulators {
+			buck3210_reg: buck3210 {
+				/* VDD_CORE */
+				regulator-name = "buck3210";
+				regulator-min-microvolt = <800000>;
+				regulator-max-microvolt = <900000>;
+				regulator-always-on;
+				regulator-boot-on;
+				u-boot,dm-spl;
 			};
 		};
 	};
