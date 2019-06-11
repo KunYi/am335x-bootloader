@@ -10,6 +10,7 @@
 #include <ram.h>
 #include <asm/io.h>
 #include <power-domain.h>
+#include <power/regulator.h>
 #include <dm.h>
 #include <i2c.h>
 #include "ddrss_addr_map_sfr_offs.h"
@@ -1710,8 +1711,17 @@ static int j721e_ddrss_ofdata_to_priv(struct udevice *dev)
 static int j721e_ddrss_probe(struct udevice *dev)
 {
 	struct j721e_ddrss_desc *ddrss = dev_get_priv(dev);
-	struct udevice *i2c_dev;
+	struct udevice *i2c_dev, *rdev;
 	int ret;
+
+	printf("Before j721e_ddrss_probe device_get_supply_regulator\n");
+	ret = device_get_supply_regulator(dev, "core-supply", &rdev);
+	if (ret)
+		printf("%s: No core supply\n", rdev->name);
+
+	ret = regulator_set_value(rdev, 900000);
+	if (ret)
+		printf("%s: Set voltage failed\n", rdev->name);
 
 	debug("%s(dev=%p)\n", __func__, dev);
 
