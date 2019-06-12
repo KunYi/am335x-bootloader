@@ -126,6 +126,9 @@ void board_init_f(ulong dummy)
 	preloader_console_init();
 #endif
 
+	/* Perform EEPROM-based board detection */
+	do_board_detect();
+
 #if defined(CONFIG_CPU_V7R) && defined(CONFIG_K3_AVS0)
 	ret = uclass_get_device(UCLASS_AVS, 0, &dev);
 	if (ret)
