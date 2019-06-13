@@ -42,7 +42,7 @@ static void ddr_change_freq_ack(struct j721e_ddrss_desc *ddrss)
 {
 	unsigned int req_type, reg_value, counter, counter2, ret;
 
-	printf("--->>> LPDDR4 Initialization is in progress ... <<<---\n");
+	debug("--->>> LPDDR4 Initialization is in progress ... <<<---\n");
 
 	for(counter = 0; counter < 10; counter++) {
 		reg_value = readl(0x0114080) & 0x80;
@@ -51,8 +51,9 @@ static void ddr_change_freq_ack(struct j721e_ddrss_desc *ddrss)
 
 		req_type = readl(0x0114080) & 0x03;
 
-		printf("%s: Received freq change req: req type = %d, req no. = %d \n", __func__,
+		debug("%s: Received freq change req: req type = %d, req no. = %d \n", __func__,
 		       req_type, counter);
+		mdelay(10);
 		if(req_type == 1){
 			ret = readl(0x68c020);
 			writel(ret & 0x7fffffff, 0x68C020);
@@ -67,7 +68,7 @@ static void ddr_change_freq_ack(struct j721e_ddrss_desc *ddrss)
 			/* Put DDR pll in bypass mode */
 			writel(ret | 0x80000000, 0x68C020);
 		} else {
-			printf("%s: Invalid freq request type\n", __func__);
+			debug("%s: Invalid freq request type\n", __func__);
 		}
 
 		counter2 = 0;
@@ -83,7 +84,7 @@ static void ddr_change_freq_ack(struct j721e_ddrss_desc *ddrss)
 
 static int j721e_ddrss_init(struct j721e_ddrss_desc *ddrss)
 {
-	printf("--->>> DDR controller programming in progress.. <<<---\n");
+	debug("--->>> DDR controller programming in progress.. <<<---\n");
 
 	ddrss_writel(ddrss, DENALI_CTL_0__SFR_OFFS, DENALI_CTL_00_DATA);
 	ddrss_writel(ddrss, DENALI_CTL_1__SFR_OFFS, DENALI_CTL_01_DATA);
@@ -545,9 +546,9 @@ static int j721e_ddrss_init(struct j721e_ddrss_desc *ddrss)
 	ddrss_writel(ddrss, DENALI_CTL_457__SFR_OFFS, DENALI_CTL_457_DATA);
 	ddrss_writel(ddrss, DENALI_CTL_458__SFR_OFFS, DENALI_CTL_458_DATA);
 
-	printf("--->>> DDR controller programming completed... <<<---\n");
+	debug("--->>> DDR controller programming completed... <<<---\n");
 
-	printf("--->>> DDR PI programming in progress.. <<<---\n");
+	debug("--->>> DDR PI programming in progress.. <<<---\n");
 
 	ddrss_writel(ddrss, DDRSS_PI_REGISTER_BLOCK__OFFS + DENALI_PI_0__SFR_OFFS, DENALI_PI_00_DATA);
 	ddrss_writel(ddrss, DDRSS_PI_REGISTER_BLOCK__OFFS + DENALI_PI_1__SFR_OFFS, DENALI_PI_01_DATA	);
@@ -850,9 +851,9 @@ static int j721e_ddrss_init(struct j721e_ddrss_desc *ddrss)
 	ddrss_writel(ddrss, DDRSS_PI_REGISTER_BLOCK__OFFS + DENALI_PI_298__SFR_OFFS, DENALI_PI_298_DATA);
 	ddrss_writel(ddrss, DDRSS_PI_REGISTER_BLOCK__OFFS + DENALI_PI_299__SFR_OFFS, DENALI_PI_299_DATA);
 
-	printf("--->>> DDR PI programming completed... <<<---\n");
+	debug("--->>> DDR PI programming completed... <<<---\n");
 
-	printf("--->>> DDR PHY Data Slice 0 programming in progress.. <<<---\n");
+	debug("--->>> DDR PHY Data Slice 0 programming in progress.. <<<---\n");
 
 	ddrss_writel(ddrss, DDRSS_Data_Slice_0_REGISTER_BLOCK__OFFS + DENALI_PHY_0__SFR_OFFS, DENALI_PHY_00_DATA);
 	ddrss_writel(ddrss, DDRSS_Data_Slice_0_REGISTER_BLOCK__OFFS + DENALI_PHY_1__SFR_OFFS, DENALI_PHY_01_DATA);
@@ -994,9 +995,9 @@ static int j721e_ddrss_init(struct j721e_ddrss_desc *ddrss)
 	ddrss_writel(ddrss, DDRSS_Data_Slice_0_REGISTER_BLOCK__OFFS + DENALI_PHY_137__SFR_OFFS, DENALI_PHY_137_DATA);
 	ddrss_writel(ddrss, DDRSS_Data_Slice_0_REGISTER_BLOCK__OFFS + DENALI_PHY_138__SFR_OFFS, DENALI_PHY_138_DATA);
 	ddrss_writel(ddrss, DDRSS_Data_Slice_0_REGISTER_BLOCK__OFFS + DENALI_PHY_139__SFR_OFFS, DENALI_PHY_139_DATA);
-	printf("--->>> DDR PHY Data Slice 0 programming completed... <<<---\n");
+	debug("--->>> DDR PHY Data Slice 0 programming completed... <<<---\n");
 
-	printf("--->>> DDR PHY Data Slice 1 programming in progress.. <<<---\n");
+	debug("--->>> DDR PHY Data Slice 1 programming in progress.. <<<---\n");
 	ddrss_writel(ddrss, DDRSS_Data_Slice_1_REGISTER_BLOCK__OFFS + DENALI_PHY_256__SFR_OFFS, DENALI_PHY_256_DATA);
 	ddrss_writel(ddrss, DDRSS_Data_Slice_1_REGISTER_BLOCK__OFFS + DENALI_PHY_257__SFR_OFFS, DENALI_PHY_257_DATA);
 	ddrss_writel(ddrss, DDRSS_Data_Slice_1_REGISTER_BLOCK__OFFS + DENALI_PHY_258__SFR_OFFS, DENALI_PHY_258_DATA);
@@ -1137,8 +1138,8 @@ static int j721e_ddrss_init(struct j721e_ddrss_desc *ddrss)
 	ddrss_writel(ddrss, DDRSS_Data_Slice_1_REGISTER_BLOCK__OFFS + DENALI_PHY_393__SFR_OFFS, DENALI_PHY_393_DATA);
 	ddrss_writel(ddrss, DDRSS_Data_Slice_1_REGISTER_BLOCK__OFFS + DENALI_PHY_394__SFR_OFFS, DENALI_PHY_394_DATA);
 	ddrss_writel(ddrss, DDRSS_Data_Slice_1_REGISTER_BLOCK__OFFS + DENALI_PHY_395__SFR_OFFS, DENALI_PHY_395_DATA);
-	printf("--->>> DDR PHY Data Slice 1 programming completed... <<<---\n");
-	printf("--->>> DDR PHY Data Slice 2 programming in progress.. <<<---\n");
+	debug("--->>> DDR PHY Data Slice 1 programming completed... <<<---\n");
+	debug("--->>> DDR PHY Data Slice 2 programming in progress.. <<<---\n");
 
 	ddrss_writel(ddrss, DDRSS_Data_Slice_2_REGISTER_BLOCK__OFFS + DENALI_PHY_512__SFR_OFFS, DENALI_PHY_512_DATA);
 	ddrss_writel(ddrss, DDRSS_Data_Slice_2_REGISTER_BLOCK__OFFS + DENALI_PHY_513__SFR_OFFS, DENALI_PHY_513_DATA);
@@ -1281,8 +1282,8 @@ static int j721e_ddrss_init(struct j721e_ddrss_desc *ddrss)
 	ddrss_writel(ddrss, DDRSS_Data_Slice_2_REGISTER_BLOCK__OFFS + DENALI_PHY_650__SFR_OFFS, DENALI_PHY_650_DATA);
 	ddrss_writel(ddrss, DDRSS_Data_Slice_2_REGISTER_BLOCK__OFFS + DENALI_PHY_651__SFR_OFFS, DENALI_PHY_651_DATA);
 
-	printf("--->>> DDR PHY Data Slice 2 programming completed... <<<---\n");
-	printf("--->>> DDR PHY Data Slice 3 programming in progress.. <<<---\n");
+	debug("--->>> DDR PHY Data Slice 2 programming completed... <<<---\n");
+	debug("--->>> DDR PHY Data Slice 3 programming in progress.. <<<---\n");
 
 	ddrss_writel(ddrss, DDRSS_Data_Slice_3_REGISTER_BLOCK__OFFS + DENALI_PHY_768__SFR_OFFS, DENALI_PHY_768_DATA);
 	ddrss_writel(ddrss, DDRSS_Data_Slice_3_REGISTER_BLOCK__OFFS + DENALI_PHY_769__SFR_OFFS, DENALI_PHY_769_DATA);
@@ -1425,9 +1426,9 @@ static int j721e_ddrss_init(struct j721e_ddrss_desc *ddrss)
 	ddrss_writel(ddrss, DDRSS_Data_Slice_3_REGISTER_BLOCK__OFFS + DENALI_PHY_906__SFR_OFFS, DENALI_PHY_906_DATA);
 	ddrss_writel(ddrss, DDRSS_Data_Slice_3_REGISTER_BLOCK__OFFS + DENALI_PHY_907__SFR_OFFS, DENALI_PHY_907_DATA);
 
-	printf("--->>> DDR PHY Data Slice 3 programming completed... <<<---\n");
+	debug("--->>> DDR PHY Data Slice 3 programming completed... <<<---\n");
 
-	printf("--->>> DDR PHY Address slice 0 programming in progress.. <<<---\n");
+	debug("--->>> DDR PHY Address slice 0 programming in progress.. <<<---\n");
 	ddrss_writel(ddrss, DDRSS_Address_Slice_0_REGISTER_BLOCK__OFFS + DENALI_PHY_1024__SFR_OFFS, DENALI_PHY_1024_DATA);
 	ddrss_writel(ddrss, DDRSS_Address_Slice_0_REGISTER_BLOCK__OFFS + DENALI_PHY_1025__SFR_OFFS, DENALI_PHY_1025_DATA);
 	ddrss_writel(ddrss, DDRSS_Address_Slice_0_REGISTER_BLOCK__OFFS + DENALI_PHY_1026__SFR_OFFS, DENALI_PHY_1026_DATA);
@@ -1480,10 +1481,10 @@ static int j721e_ddrss_init(struct j721e_ddrss_desc *ddrss)
 	ddrss_writel(ddrss, DDRSS_Address_Slice_0_REGISTER_BLOCK__OFFS + DENALI_PHY_1073__SFR_OFFS, DENALI_PHY_1073_DATA);
 	ddrss_writel(ddrss, DDRSS_Address_Slice_0_REGISTER_BLOCK__OFFS + DENALI_PHY_1074__SFR_OFFS, DENALI_PHY_1074_DATA);
 	ddrss_writel(ddrss, DDRSS_Address_Slice_0_REGISTER_BLOCK__OFFS + DENALI_PHY_1075__SFR_OFFS, DENALI_PHY_1075_DATA);
-	printf("--->>> DDR PHY Address Slice 0 programming completed... <<<---\n");
-	printf("--->>> DDR PHY programming in progress.. <<<---\n");
+	debug("--->>> DDR PHY Address Slice 0 programming completed... <<<---\n");
+	debug("--->>> DDR PHY programming in progress.. <<<---\n");
 
-	printf("--->>> Set PHY registers for F1 freq... <<<---\n");
+	debug("--->>> Set PHY registers for F1 freq... <<<---\n");
 	ddrss_writel(ddrss, DDRSS_PHY_Core_REGISTER_BLOCK__OFFS + DENALI_PHY_1281__SFR_OFFS, 0x00000100);
 
 	ddrss_writel(ddrss, DDRSS_PHY_Core_REGISTER_BLOCK__OFFS + DENALI_PHY_1280__SFR_OFFS, DENALI_PHY_1280_DATA);
@@ -1629,15 +1630,17 @@ static int j721e_ddrss_init(struct j721e_ddrss_desc *ddrss)
 	ddrss_writel(ddrss, DDRSS_PHY_Core_REGISTER_BLOCK__OFFS + DENALI_PHY_1420__SFR_OFFS, DENALI_PHY_1420_DATA);
 	ddrss_writel(ddrss, DDRSS_PHY_Core_REGISTER_BLOCK__OFFS + DENALI_PHY_1421__SFR_OFFS, DENALI_PHY_1421_DATA);
 	ddrss_writel(ddrss, DDRSS_PHY_Core_REGISTER_BLOCK__OFFS + DENALI_PHY_1422__SFR_OFFS, DENALI_PHY_1422_DATA);
-	printf("--->>> DDR PHY programming completed... <<<---\n");
+	debug("--->>> DDR PHY programming completed... <<<---\n");
 
 	ddrss_writel(ddrss, DDRSS_PI_REGISTER_BLOCK__OFFS + DENALI_PI_0__SFR_OFFS,   0x00000B01);
 
-	printf("--->>> DDR PI initialization started... <<<---\n");
+	debug("--->>> DDR PI initialization started... <<<---\n");
+	mdelay(10);
 
 	ddrss_writel(ddrss, DENALI_CTL_0__SFR_OFFS,   0x00000B01);
 
-	printf("--->>> DDR Controller initialization started... <<<---\n");
+	debug("--->>> DDR Controller initialization started... <<<---\n");
+	mdelay(10);
 
 	ddr_change_freq_ack(ddrss);
 
