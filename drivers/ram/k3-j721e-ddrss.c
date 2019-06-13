@@ -26,6 +26,7 @@ struct j721e_ddrss_desc {
 	struct power_domain ddrcfg_pwrdmn;
 	struct power_domain ddrdata_pwrdmn;
 	struct clk ddr_clk;
+	struct clk osc_clk;
 };
 
 static void ddrss_writel(struct j721e_ddrss_desc *ddrss, u32 offset, u32 val)
@@ -40,7 +41,7 @@ static u32 ddrss_readl(struct j721e_ddrss_desc *ddrss, u32 offset)
 
 static void ddr_change_freq_ack(struct j721e_ddrss_desc *ddrss)
 {
-	unsigned int req_type, reg_value, counter, counter2, ret;
+	unsigned int req_type, reg_value, counter, counter2;
 
 	debug("--->>> LPDDR4 Initialization is in progress ... <<<---\n");
 
@@ -54,22 +55,17 @@ static void ddr_change_freq_ack(struct j721e_ddrss_desc *ddrss)
 		debug("%s: Received freq change req: req type = %d, req no. = %d \n", __func__,
 		       req_type, counter);
 		mdelay(10);
-		if(req_type == 1){
-			ret = readl(0x68c020);
-			writel(ret & 0x7fffffff, 0x68C020);
+		if(req_type == 1)
 			clk_set_rate(&ddrss->ddr_clk, DDR_PLL_FREQ);
-		} else if (req_type == 2) {
-			ret = readl(0x68c020);
-			writel(ret & 0x7fffffff, 0x68C020);
+		else if (req_type == 2)
 			clk_set_rate(&ddrss->ddr_clk, DDR_PLL_FREQ);
 		/* Put DDR pll in bypass mode */
-		} else if (req_type == 0){
-			ret = readl(0x68c020);
+		else if (req_type == 0)
 			/* Put DDR pll in bypass mode */
-			writel(ret | 0x80000000, 0x68C020);
-		} else {
-			debug("%s: Invalid freq request type\n", __func__);
-		}
+			clk_set_rate(&ddrss->ddr_clk,
+				     clk_get_rate(&ddrss->osc_clk));
+		else
+			printf("%s: Invalid freq request type\n", __func__);
 
 		counter2 = 0;
 		while(counter2 < 1000)
@@ -1705,10 +1701,16 @@ static int j721e_ddrss_ofdata_to_priv(struct udevice *dev)
 	if (ret)
 		dev_err(dev, "clk get failed%d\n", ret);
 
-	ret = readl(0x68c020);
+	ret = clk_get_by_index(dev, 1, &ddrss->osc_clk);
+	if (ret)
+		dev_err(dev, "clk get failed for osc clk %d\n", ret);
+
 	/* Put DDR pll in bypass mode */
-	writel(ret | 0x80000000, 0x68C020);
-	return 0;
+	ret = clk_set_rate(&ddrss->ddr_clk, clk_get_rate(&ddrss->osc_clk));
+	if (ret)
+		dev_err(dev, "ddr clk bypass failed\n");
+
+	return ret;
 }
 
 static int j721e_ddrss_probe(struct udevice *dev)
