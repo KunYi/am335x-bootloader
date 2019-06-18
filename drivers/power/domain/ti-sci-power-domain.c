@@ -68,8 +68,8 @@ static int ti_sci_power_domain_on(struct power_domain *pd)
 		ret = dops->get_device(sci, pd->id);
 
 	if (ret)
-		dev_err(power_domain->dev, "%s: get_device failed (%d)\n",
-			__func__, ret);
+		dev_err(power_domain->dev, "%s: get_device(%lu) failed (%d)\n",
+			__func__, pd->id, ret);
 
 	return ret;
 }
