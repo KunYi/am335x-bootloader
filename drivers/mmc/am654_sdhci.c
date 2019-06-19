@@ -291,6 +291,8 @@ int am654_sdhci_init(struct am654_sdhci_plat *plat)
 	return 0;
 }
 
+#define MAX_SDCD_DEBOUNCE_TIME 2000
+
 static int am654_sdhci_probe(struct udevice *dev)
 {
 	struct am654_sdhci_plat *plat = dev_get_platdata(dev);
@@ -299,8 +301,9 @@ static int am654_sdhci_probe(struct udevice *dev)
 	struct mmc_config *cfg = &plat->cfg;
 	struct power_domain sdhci_pwrdmn;
 	struct clk clk;
+	unsigned long start;
 	unsigned long clock;
-	int ret;
+	int val, ret;
 
 #if defined(CONFIG_SPL_BUILD) && defined(CONFIG_ARCH_K3)
 	u32 boot_device;
@@ -368,6 +371,20 @@ static int am654_sdhci_probe(struct udevice *dev)
 	regmap_init_mem_index(dev_ofnode(dev), &plat->base, 1);
 
 	am654_sdhci_init(plat);
+
+	/*
+	 * The controller takes about 1 second to debounce the card detect line
+	 * and doesn't let us power on until that time is up. Instead of waiting
+	 * for 1 second at every stage, poll on the CARD_PRESENT bit upto a
+	 * maximum of 2 seconds to be safe..
+	 */
+	start = get_timer(0);
+	do {
+		if (get_timer(start) > MAX_SDCD_DEBOUNCE_TIME)
+			return -ENOMEDIUM;
+
+		val = mmc_getcd(host->mmc);
+	} while (!val);
 
 	return sdhci_probe(dev);
 }
