@@ -255,7 +255,22 @@ const struct sdhci_ops am654_sdhci_ops = {
 	.platform_execute_tuning = &am654_sdhci_execute_tuning,
 };
 
+static int j721e_4bit_sdhci_set_ios_post(struct sdhci_host *host)
+{
+	struct udevice *dev = host->mmc->dev;
+	struct am654_sdhci_plat *plat = dev_get_platdata(dev);
+	u32 mask, val;
+
+	mask = OTAPDLYENA_MASK | OTAPDLYSEL_MASK;
+	val = (1 << OTAPDLYENA_SHIFT) |
+	      (plat->otap_del_sel << OTAPDLYSEL_SHIFT);
+	regmap_update_bits(plat->base, PHY_CTRL4, mask, val);
+
+	return 0;
+}
+
 const struct sdhci_ops j721e_4bit_sdhci_ops = {
+	.set_ios_post		= &j721e_4bit_sdhci_set_ios_post,
 	.set_control_reg	= &am654_sdhci_set_control_reg,
 	.platform_execute_tuning = &am654_sdhci_execute_tuning,
 };
