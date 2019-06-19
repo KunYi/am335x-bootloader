@@ -81,6 +81,7 @@ struct am654_sdhci_plat {
 	u32 drv_strength;
 	u32 flags;
 #define DLL_PRESENT	(1 << 0)
+#define IOMUX_PRESENT	(1 << 1)
 	bool dll_on;
 };
 
@@ -280,7 +281,8 @@ int am654_sdhci_init(struct am654_sdhci_plat *plat)
 	}
 
 	/* Enable pins by setting IO mux to 0 */
-	regmap_update_bits(plat->base, PHY_CTRL1, IOMUX_ENABLE_MASK, 0);
+	if (plat->flags & IOMUX_PRESENT)
+		regmap_update_bits(plat->base, PHY_CTRL1, IOMUX_ENABLE_MASK, 0);
 
 	/* Set slot type based on SD or eMMC */
 	if (plat->non_removable)
@@ -404,6 +406,10 @@ static int am654_sdhci_ofdata_to_platdata(struct udevice *dev)
 	if (device_is_compatible(dev, "ti,am654-sdhci-5.1") ||
 	    device_is_compatible(dev, "ti,j721e-sdhci-8bit"))
 		plat->flags |= DLL_PRESENT;
+
+	if (device_is_compatible(dev, "ti,am654-sdhci-5.1") ||
+	    device_is_compatible(dev, "ti,j721e-sdhci-4bit"))
+		plat->flags |= IOMUX_PRESENT;
 
 	ret = dev_read_u32(dev, "ti,otap-del-sel", &plat->otap_del_sel);
 	if (ret)
