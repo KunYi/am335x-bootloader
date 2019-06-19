@@ -46,6 +46,8 @@
 #define SEL50_MASK		BIT(SEL50_SHIFT)
 #define SEL100_SHIFT		9
 #define SEL100_MASK		BIT(SEL100_SHIFT)
+#define FREQSEL_SHIFT		8
+#define FREQSEL_MASK		GENMASK(10, 8)
 #define DLL_TRIM_ICP_SHIFT	4
 #define DLL_TRIM_ICP_MASK	GENMASK(7, 4)
 #define DR_TY_SHIFT		20
@@ -82,6 +84,7 @@ struct am654_sdhci_plat {
 	u32 flags;
 #define DLL_PRESENT	(1 << 0)
 #define IOMUX_PRESENT	(1 << 1)
+#define FREQSEL_2_BIT	(1 << 2)
 	bool dll_on;
 };
 
@@ -174,7 +177,7 @@ static int am654_sdhci_set_ios_post(struct sdhci_host *host)
 	struct udevice *dev = host->mmc->dev;
 	struct am654_sdhci_plat *plat = dev_get_platdata(dev);
 	unsigned int speed = host->mmc->clock;
-	int sel50, sel100;
+	int sel50, sel100, freqsel;
 	u32 mask, val;
 	int ret;
 
@@ -199,25 +202,35 @@ static int am654_sdhci_set_ios_post(struct sdhci_host *host)
 		val = (1 << OTAPDLYENA_SHIFT) |
 		      (plat->otap_del_sel << OTAPDLYSEL_SHIFT);
 		regmap_update_bits(plat->base, PHY_CTRL4, mask, val);
-		switch (speed) {
-		case 200000000:
-			sel50 = 0;
-			sel100 = 0;
-			break;
-		case 100000000:
-			sel50 = 0;
-			sel100 = 1;
-			break;
-		default:
-			sel50 = 1;
-			sel100 = 0;
+		if (plat->flags & FREQSEL_2_BIT) {
+			switch (speed) {
+			case 200000000:
+				sel50 = 0;
+				sel100 = 0;
+				break;
+			case 100000000:
+				sel50 = 0;
+				sel100 = 1;
+				break;
+			default:
+				sel50 = 1;
+				sel100 = 0;
+			}
+
+			/* Configure PHY DLL frequency */
+			mask = SEL50_MASK | SEL100_MASK;
+			val = (sel50 << SEL50_SHIFT) | (sel100 << SEL100_SHIFT);
+			regmap_update_bits(plat->base, PHY_CTRL5, mask, val);
+		} else {
+			switch (speed) {
+			case 200000000:
+				freqsel = 0x0;
+			default:
+				freqsel = 0x4;
+			}
+			regmap_update_bits(plat->base, PHY_CTRL5, FREQSEL_MASK,
+					   freqsel << FREQSEL_SHIFT);
 		}
-
-		/* Configure PHY DLL frequency */
-		mask = SEL50_MASK | SEL100_MASK;
-		val = (sel50 << SEL50_SHIFT) | (sel100 << SEL100_SHIFT);
-		regmap_update_bits(plat->base, PHY_CTRL5, mask, val);
-
 		/* Enable DLL */
 		regmap_update_bits(plat->base, PHY_CTRL1, ENDLL_MASK,
 				   0x1 << ENDLL_SHIFT);
@@ -410,6 +423,9 @@ static int am654_sdhci_ofdata_to_platdata(struct udevice *dev)
 	if (device_is_compatible(dev, "ti,am654-sdhci-5.1") ||
 	    device_is_compatible(dev, "ti,j721e-sdhci-4bit"))
 		plat->flags |= IOMUX_PRESENT;
+
+	if (device_is_compatible(dev, "ti,am654-sdhci-5.1"))
+		plat->flags |= FREQSEL_2_BIT;
 
 	ret = dev_read_u32(dev, "ti,otap-del-sel", &plat->otap_del_sel);
 	if (ret)
