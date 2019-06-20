@@ -106,24 +106,28 @@ static void cfi_mtd_sync(struct mtd_info *mtd)
 
 static int cfi_mtd_lock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 {
+#ifdef CONFIG_SYS_FLASH_PROTECTION
 	flash_info_t *fi = mtd->priv;
 
 	flash_set_verbose(0);
 	flash_protect(FLAG_PROTECT_SET, fi->start[0] + ofs,
 					fi->start[0] + ofs + len - 1, fi);
 	flash_set_verbose(1);
+#endif
 
 	return 0;
 }
 
 static int cfi_mtd_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 {
+#ifdef CONFIG_SYS_FLASH_PROTECTION
 	flash_info_t *fi = mtd->priv;
 
 	flash_set_verbose(0);
 	flash_protect(FLAG_PROTECT_CLEAR, fi->start[0] + ofs,
 					fi->start[0] + ofs + len - 1, fi);
 	flash_set_verbose(1);
+#endif
 
 	return 0;
 }
