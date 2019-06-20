@@ -25,6 +25,7 @@ static int spl_nor_load_image(struct spl_image_info *spl_image,
 	__maybe_unused const struct image_header *header;
 	__maybe_unused struct spl_load_info load;
 
+	flash_init();
 	/*
 	 * Loading of the payload to SDRAM is done with skipping of
 	 * the mkimage header in this SPL NOR driver
