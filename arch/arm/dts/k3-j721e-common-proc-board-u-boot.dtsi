@@ -52,6 +52,13 @@
 
 &wkup_pmx0 {
 	u-boot,dm-spl;
+
+	wkup_gpio0_pins_default: wkup_gpio0_pins_default {
+		pinctrl-single,pins = <
+			J721E_WKUP_IOPAD(0xd0, PIN_INPUT, 7) /* (G27) WKUP_GPIO0_8 */
+		>;
+		u-boot,dm-spl;
+	};
 };
 
 &main_pmx0 {
@@ -120,4 +127,11 @@
 	flash@0 {
 		u-boot,dm-spl;
 	};
+};
+
+&wkup_gpio0 {
+	u-boot,dm-spl;
+
+	pinctrl-names = "default";
+	pinctrl-0 = <&wkup_gpio0_pins_default>;
 };
