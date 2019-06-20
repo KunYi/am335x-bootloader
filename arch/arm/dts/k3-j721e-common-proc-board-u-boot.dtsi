@@ -117,6 +117,10 @@
 	u-boot,dm-spl;
 };
 
+&mcu_fss0_hpb0_pins_default {
+	u-boot,dm-spl;
+};
+
 &fss {
 	u-boot,dm-spl;
 };
@@ -134,4 +138,16 @@
 
 	pinctrl-names = "default";
 	pinctrl-0 = <&wkup_gpio0_pins_default>;
+};
+
+&hbmc {
+	u-boot,dm-spl;
+
+	flash@0,0 {
+		u-boot,dm-spl;
+	};
+};
+
+&hbmc_mux {
+	u-boot,dm-spl;
 };
