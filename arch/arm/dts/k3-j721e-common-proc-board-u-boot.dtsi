@@ -126,6 +126,7 @@
 };
 
 &ospi0 {
+	status = "okay";
 	u-boot,dm-spl;
 
 	flash@0 {
