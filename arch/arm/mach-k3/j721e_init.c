@@ -128,16 +128,16 @@ void board_init_f(ulong dummy)
 	if (!ret)
 		pinctrl_select_state(dev, "default");
 
-	/*
-	 * Load, start up, and configure system controller firmware. Provide
-	 * the U-Boot console init function to the SYSFW post-PM configuration
-	 * callback hook, effectively switching on (or over) the console
-	 * output.
-	 */
-	k3_sysfw_loader(preloader_console_init);
-#else
+	/* Load, start up, and configure system controller firmware */
+	k3_sysfw_loader(NULL);
+#endif
+
 	/* Prepare console output */
 	preloader_console_init();
+
+#ifdef CONFIG_K3_LOAD_SYSFW
+	/* Output System Firmware version info */
+	k3_sysfw_loader_print_ver();
 #endif
 
 	/* Perform EEPROM-based board detection */

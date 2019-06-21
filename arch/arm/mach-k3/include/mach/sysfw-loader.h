@@ -8,5 +8,6 @@
 #define _SYSFW_LOADER_H_
 
 void k3_sysfw_loader(void (*config_pm_done_callback)(void));
+void k3_sysfw_loader_print_ver(void);
 
 #endif

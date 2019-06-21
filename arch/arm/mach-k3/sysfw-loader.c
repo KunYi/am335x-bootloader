@@ -158,6 +158,15 @@ static void k3_sysfw_configure_using_fit(void *fit,
 		hang();
 	}
 
+	/*
+	 * Now that all clocks and PM aspects are setup, invoke a user-
+	 * provided callback function. Usually this callback would be used
+	 * to setup or reconfigure any clocks that may need updated values
+	 * as SYSFW PM init can changes the defaults.
+	 */
+	if (config_pm_done_callback)
+		config_pm_done_callback();
+
 	/* Apply resource management (RM) configuration to SYSFW */
 	ret = board_ops->board_config_rm(ti_sci,
 					 (u64)(u32)cfg_fragment_addr,
@@ -185,14 +194,6 @@ static void k3_sysfw_configure_using_fit(void *fit,
 		       ret);
 		hang();
 	}
-
-	/*
-	 * Now that all clocks and PM aspects are setup, invoke a user-
-	 * provided callback function. Usually this callback would be used
-	 * to setup or re-configure the U-Boot console UART.
-	 */
-	if (config_pm_done_callback)
-		config_pm_done_callback();
 }
 
 #if CONFIG_IS_ENABLED(SPI_LOAD)
@@ -320,8 +321,16 @@ void k3_sysfw_loader(void (*config_pm_done_callback)(void))
 
 	/* Parse and apply the different SYSFW configuration fragments */
 	k3_sysfw_configure_using_fit(addr, ti_sci, config_pm_done_callback);
+}
 
-	/* Output System Firmware version info */
+/* Output System Firmware version info */
+void k3_sysfw_loader_print_ver(void)
+{
+	struct ti_sci_handle *ti_sci = get_ti_sci_handle();
+
+	if (!ti_sci)
+		return;
+
 	printf("SYSFW ABI: %d.%d (firmware rev 0x%04x '%.*s')\n",
 	       ti_sci->version.abi_major, ti_sci->version.abi_minor,
 	       ti_sci->version.firmware_revision,
