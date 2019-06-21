@@ -18,6 +18,7 @@
 #include <dm.h>
 #include <dm/uclass-internal.h>
 #include <dm/pinctrl.h>
+#include <clk.h>
 #include <remoteproc.h>
 
 #ifdef CONFIG_SPL_BUILD
@@ -71,6 +72,24 @@ static void store_boot_index_from_rom(void)
 {
 	bootindex = *(u32 *)(CONFIG_SYS_K3_BOOT_PARAM_TABLE_INDEX);
 }
+
+#ifdef CONFIG_K3_LOAD_SYSFW
+static void j721e_config_pm_done_callback(void)
+{
+	struct udevice *dev;
+	int ret;
+
+	if (spl_boot_device() == BOOT_DEVICE_HYPERFLASH) {
+		ret = uclass_find_first_device(UCLASS_MTD, &dev);
+		if (ret)
+			panic("%s: Can't find HyperFlash device! (%d)\n",
+			      __func__, ret);
+
+		/* Reconfigure HBMC clk */
+		clk_set_defaults(dev);
+	}
+}
+#endif
 
 void board_init_f(ulong dummy)
 {
@@ -128,8 +147,11 @@ void board_init_f(ulong dummy)
 	if (!ret)
 		pinctrl_select_state(dev, "default");
 
-	/* Load, start up, and configure system controller firmware */
-	k3_sysfw_loader(NULL);
+	/*
+	 * Load, start up, and configure system controller firmware while
+	 * also populating the SYSFW post-PM configuration callback hook.
+	 */
+	k3_sysfw_loader(j721e_config_pm_done_callback);
 #endif
 
 	/* Prepare console output */
