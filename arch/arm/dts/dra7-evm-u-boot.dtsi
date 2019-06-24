@@ -5,6 +5,18 @@
 
 #include "omap5-u-boot.dtsi"
 
+/ {
+	chosen {
+		firmware-loader = &fs_loader0;
+	};
+
+	fs_loader0: fs_loader@0 {
+		u-boot,dm-pre-reloc;
+		compatible = "u-boot,fs-loader";
+		phandlepart = <&mmc1 1>;
+	};
+};
+
 &pcf_gpio_21{
 	u-boot,i2c-offset-len = <0>;
 };
