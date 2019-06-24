@@ -91,6 +91,35 @@ static void j721e_config_pm_done_callback(void)
 }
 #endif
 
+#ifdef CONFIG_CPU_V7R
+void setup_dss_credentials(void)
+{
+	unsigned int ch, group;
+	phys_addr_t *pMapReg, *pMap1Reg, *pMap2Reg;
+
+	/* set order ID for DSS masters, there are 10 masters in DSS */
+	for (ch = 0; ch < 10; ch++) {
+		pMapReg = (phys_addr_t *)((uintptr_t)DSS_DMA_QOS_BASE + 0x100 + (4 * ch));
+		pMapReg[ch] = 0x9 << 4;  /* Set orderid=9 */
+	}
+
+	for (group = 0; group < 2; group++) {
+		pMap1Reg = (phys_addr_t *)((uintptr_t)DSS_DMA_QOS_BASE + 0x0 + (8 * group));
+		pMap2Reg = (phys_addr_t *)((uintptr_t)DSS_DMA_QOS_BASE + 0x4 + (8 * group));
+		*pMap1Reg = 0x76543210;
+		*pMap2Reg = 0xfedcba98;
+	}
+
+	/* Setup NB configuration */
+	*((unsigned int *)(CSL_NAVSS0_NBSS_NB0_CFG_MMRS_BASE + 0x10)) = 2;
+	*((unsigned int *)(CSL_NAVSS0_NBSS_NB1_CFG_MMRS_BASE + 0x10)) = 2;
+	*((unsigned int *)(CSL_DSS0_VIDL1_BASE + 0x3C)) = 0xFFF0800; /* 20000 */
+	*((unsigned int *)(CSL_DSS0_VIDL2_BASE + 0x3C)) = 0xFFF0800; /* 30000 */
+	*((unsigned int *)(CSL_DSS0_VID1_BASE + 0x3C)) = 0xFFF0800; /* 50000 */
+	*((unsigned int *)(CSL_DSS0_VID2_BASE + 0x3C)) = 0xFFF0800; /* 60000 */
+}
+#endif
+
 void board_init_f(ulong dummy)
 {
 #if defined(CONFIG_K3_J721E_DDRSS) || defined(CONFIG_K3_LOAD_SYSFW)
@@ -108,6 +137,8 @@ void board_init_f(ulong dummy)
 
 #ifdef CONFIG_CPU_V7R
 	setup_k3_mpu_regions();
+
+	setup_dss_credentials();
 
 	/*
 	 * When running SPL on R5 we are using SRAM for BSS to have global
