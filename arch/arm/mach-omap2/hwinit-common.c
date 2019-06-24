@@ -222,6 +222,9 @@ void early_system_init(void)
 	debug_uart_init();
 #endif
 	prcm_init();
+#if defined(CONFIG_SPL_BUILD) && defined(CONFIG_REMOTEPROC_TI_IPU)
+	enable_ipu_clocks();
+#endif
 }
 
 #ifdef CONFIG_SPL_BUILD
