@@ -18,8 +18,12 @@
 #include <watchdog.h>
 #include <scsi.h>
 #include <i2c.h>
+#include <remoteproc.h>
 
 DECLARE_GLOBAL_DATA_PTR;
+
+#define IPU1_LOAD_ADDR	0xa0fff000
+#define IPU2_LOAD_ADDR	0xa17ff000
 
 __weak u32 omap_sys_boot_device(void)
 {
@@ -193,6 +197,58 @@ u32 spl_boot_mode(const u32 boot_device)
 	return gd->arch.omap_boot_mode;
 }
 
+void spl_boot_ipu(void)
+{
+#if defined(CONFIG_SPL_BUILD) && defined(CONFIG_REMOTEPROC_TI_IPU)
+	int ret;
+
+	ret = rproc_dev_init(0);
+	if (ret) {
+		debug("%s: IPU1 failed to initialize on rproc (%d)\n",
+		      __func__, ret);
+		goto skip_ipu;
+	}
+
+	ret = rproc_load(0, IPU1_LOAD_ADDR, 0x2000000);
+	if (ret) {
+		debug("%s: IPU1 failed to load on rproc (%d)\n", __func__,
+		      ret);
+		goto skip_ipu;
+	}
+
+	debug("Starting IPU1...\n");
+
+	ret = rproc_start(0);
+	if (ret) {
+		debug("%s: IPU1 failed to start (%d)\n", __func__, ret);
+		goto skip_ipu;
+	}
+
+	ret = rproc_dev_init(1);
+	if (ret) {
+		debug("%s: IPU2 failed to initialize on rproc (%d)\n", __func__,
+		      ret);
+		goto skip_ipu;
+	}
+
+	ret = rproc_load(1, IPU2_LOAD_ADDR, 0x2000000);
+	if (ret) {
+		debug("%s: IPU2 failed to load on rproc (%d)\n", __func__,
+		      ret);
+		goto skip_ipu;
+	}
+
+	debug("Starting IPU2...\n");
+
+	ret = rproc_start(1);
+	if (ret)
+		debug("%s: IPU2 failed to start (%d)\n", __func__, ret);
+skip_ipu:
+
+	return;
+#endif
+}
+
 void spl_board_init(void)
 {
 #ifdef CONFIG_SPL_SERIAL_SUPPORT
@@ -213,6 +269,9 @@ void spl_board_init(void)
 #endif
 #ifdef CONFIG_AM33XX
 	am33xx_spl_board_init();
+#endif
+#if defined(CONFIG_SPL_BUILD) && defined(CONFIG_REMOTEPROC_TI_IPU)
+	spl_boot_ipu();
 #endif
 }
 
