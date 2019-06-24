@@ -86,3 +86,19 @@
 	status = "okay";
 	u-boot,dm-spl;
 };
+
+&l4_wkup {
+	u-boot,dm-spl;
+};
+
+&prm {
+	u-boot,dm-spl;
+};
+
+&ipu1_rst {
+	u-boot,dm-spl;
+};
+
+&ipu2_rst {
+	u-boot,dm-spl;
+};
