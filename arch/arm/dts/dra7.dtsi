@@ -41,6 +41,8 @@
 		d_can0 = &dcan1;
 		d_can1 = &dcan2;
 		spi0 = &qspi;
+		remoteproc0 = &ipu1;
+		remoteproc1 = &ipu2;
 	};
 
 	timer {
@@ -2031,6 +2033,28 @@
 			interrupts = <GIC_SPI 47 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&l3_iclk_div>;
 			clock-names = "fck";
+		};
+
+		ipu1: ipu@58820000 {
+			compatible = "ti,dra7-ipu";
+			reg = <0x58820000 0x10000>;
+			reg-names = "l2ram";
+			ti,hwmods = "ipu1";
+			iommus = <&mmu_ipu1>;
+			ti,rproc-standby-info = <0x4a005520>;
+			timers = <&timer11>;
+			watchdog-timers = <&timer7>, <&timer8>;
+		};
+
+		ipu2: ipu@55020000 {
+			compatible = "ti,dra7-ipu";
+			reg = <0x55020000 0x10000>;
+			reg-names = "l2ram";
+			ti,hwmods = "ipu2";
+			iommus = <&mmu_ipu2>;
+			ti,rproc-standby-info = <0x4a008920>;
+			timers = <&timer3>;
+			watchdog-timers = <&timer4>, <&timer9>;
 		};
 	};
 
