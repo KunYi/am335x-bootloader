@@ -32,6 +32,57 @@ static void mmr_unlock(u32 base, u32 partition)
 	writel(CTRLMMR_LOCK_KICK1_UNLOCK_VAL, part_base + CTRLMMR_LOCK_KICK1);
 }
 
+void setup_initiator_credentials(void)
+{
+	u32 i;
+
+	/* Initiators for virtid=2 */
+	/* MMC1*/
+	writel(DMSC_QOS_PVU_CTX(2), DMSC_QOS_MMC1_RD_MAP);
+	writel(DMSC_QOS_PVU_CTX(2), DMSC_QOS_MMC1_WR_MAP);
+
+	/* DSS.VID1 */
+	writel(DMSC_QOS_PVU_CTX(2), DMSC_QOS_DSS_DMA_MAP + 0 * 4);
+	writel(DMSC_QOS_PVU_CTX(2), DMSC_QOS_DSS_DMA_MAP + 1 * 4);
+
+	/* DSS.VID2 */
+	writel(DMSC_QOS_PVU_CTX(2), DMSC_QOS_DSS_DMA_MAP + 2 * 4);
+	writel(DMSC_QOS_PVU_CTX(2), DMSC_QOS_DSS_DMA_MAP + 3 * 4);
+
+	/* DSS.VIDL2 */
+	writel(DMSC_QOS_PVU_CTX(2), DMSC_QOS_DSS_DMA_MAP + 6 * 4);
+	writel(DMSC_QOS_PVU_CTX(2), DMSC_QOS_DSS_DMA_MAP + 7 * 4);
+
+	/* Initiators for virtid=3 */
+	/* MMC0 */
+	writel(DMSC_QOS_PVU_CTX(3), DMSC_QOS_MMC0_RD_MAP);
+	writel(DMSC_QOS_PVU_CTX(3), DMSC_QOS_MMC0_WR_MAP);
+
+	/* DSS.VIDL1 */
+	writel(DMSC_QOS_PVU_CTX(3), DMSC_QOS_DSS_DMA_MAP + 4 * 4);
+	writel(DMSC_QOS_PVU_CTX(3), DMSC_QOS_DSS_DMA_MAP + 5 * 4);
+
+	/* GPU OS_id=0, chanid=[0-3] */
+	for (i = 0; i < 4; i++) {
+		writel(DMSC_QOS_PVU_CTX(3),
+			(volatile unsigned int *)DMSC_QOS_GPU_M0_RD_MAP + i);
+		writel(DMSC_QOS_PVU_CTX(3),
+			(volatile unsigned int *)DMSC_QOS_GPU_M0_WR_MAP + i);
+		writel(DMSC_QOS_PVU_CTX(3),
+			(volatile unsigned int *)DMSC_QOS_GPU_M1_RD_MAP + i);
+		writel(DMSC_QOS_PVU_CTX(3),
+			(volatile unsigned int *)DMSC_QOS_GPU_M1_WR_MAP + i);
+	}
+
+	/* D5520 chanid=[0-1] */
+	for (i = 0; i < 2; i++) {
+		writel(DMSC_QOS_PVU_CTX(3),
+			(volatile unsigned int *)DMSC_QOS_D5520_RD_MAP + i);
+		writel(DMSC_QOS_PVU_CTX(3),
+			(volatile unsigned int *)DMSC_QOS_D5520_WR_MAP + i);
+	}
+}
+
 static void ctrl_mmr_unlock(void)
 {
 	/* Unlock all WKUP_CTRL_MMR0 module registers */
@@ -137,6 +188,7 @@ void board_init_f(ulong dummy)
 
 #ifdef CONFIG_CPU_V7R
 	setup_k3_mpu_regions();
+	setup_initiator_credentials();
 
 	setup_dss_credentials();
 

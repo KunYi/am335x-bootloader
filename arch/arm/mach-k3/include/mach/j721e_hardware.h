@@ -46,6 +46,27 @@
 #define CTRLMMR_LOCK_KICK1				0x0100c
 #define CTRLMMR_LOCK_KICK1_UNLOCK_VAL			0xd172bc5a
 
+
+#define DMSC_QOS_MMC0_RD_MAP				0x45d9a100
+#define DMSC_QOS_MMC0_WR_MAP				0x45d9a500
+#define DMSC_QOS_MMC1_RD_MAP				0x45d82100
+#define DMSC_QOS_MMC1_WR_MAP				0x45d82500
+
+#define DMSC_QOS_DSS_DMA_MAP				0x45dc2100
+#define DMSC_QOS_DSS_FBDC_MAP				0x45dc2500
+
+#define DMSC_QOS_GPU_M0_RD_MAP				0x45dc5100
+#define DMSC_QOS_GPU_M0_WR_MAP				0x45dc5900
+#define DMSC_QOS_GPU_M1_RD_MAP				0x45dc6100
+#define DMSC_QOS_GPU_M1_WR_MAP				0x45dc6900
+
+#define DMSC_QOS_D5520_RD_MAP				0x45dc0500
+#define DMSC_QOS_D5520_WR_MAP				0x45dc0900
+
+
+#define DMSC_QOS_PVU_CTX(virtid)		((0x1 << 28) | (virtid << 16))
+#define DMSC_QOS_SMMU_CTX(virtid)		((0x2 << 28) | (virtid << 16))
+
 /* MCU SCRATCHPAD usage */
 #define TI_SRAM_SCRATCH_BOARD_EEPROM_START	CONFIG_SYS_K3_MCU_SCRATCHPAD_BASE
 
