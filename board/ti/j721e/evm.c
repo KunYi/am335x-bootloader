@@ -14,6 +14,7 @@
 #include <asm/io.h>
 #include <spl.h>
 #include <asm/arch/sys_proto.h>
+#include <linux/soc/ti/ti_sci_protocol.h>
 
 #include "../common/board_detect.h"
 
@@ -365,4 +366,15 @@ int board_late_init(void)
 void spl_board_init(void)
 {
 	probe_daughtercards();
+}
+
+void board_preboot_os(void)
+{
+	const struct ti_sci_handle *ti_sci;
+	const struct ti_sci_dev_ops *dops;
+
+	ti_sci = get_ti_sci_handle();
+	dops = &ti_sci->ops.dev_ops;
+
+	dops->release_exclusive_devices(ti_sci);
 }
