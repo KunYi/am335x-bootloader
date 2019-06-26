@@ -37,7 +37,7 @@
 				<&k3_pds 202 TI_SCI_PD_SHARED>;
 		resets = <&k3_reset 202 0>;
 		assigned-clocks = <&k3_clks 202 0>;
-		assigned-clock-rates = <1100000000>;
+		assigned-clock-rates = <800000000>;
 		ti,sci = <&dmsc>;
 		ti,sci-proc-id = <32>;
 		ti,sci-host-id = <10>;
