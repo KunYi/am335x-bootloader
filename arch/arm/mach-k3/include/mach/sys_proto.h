@@ -16,4 +16,6 @@ struct ti_sci_handle *get_ti_sci_handle(void);
 
 int fdt_fixup_msmc_ram(void *blob, char *parent_path, char *node_name);
 
+int fdt_disable_node(void *blob, char *node_path);
+
 #endif
