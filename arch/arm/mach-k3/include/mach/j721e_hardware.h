@@ -30,6 +30,12 @@
 #define WKUP_DEVSTAT_MCU_OMLY_MASK		BIT(6)
 #define WKUP_DEVSTAT_MCU_ONLY_SHIFT		6
 
+/* LVCMOS Drive strength registers */
+#define CTRLMMR_LVCMOS_DRIVE_H_BASE		(WKUP_CTRL_MMR0_BASE + 0x40C0)
+#define CTRLMMR_LVCMOS_DRIVE_V_BASE		(WKUP_CTRL_MMR0_BASE + 0x40D0)
+#define CTRLMMR_LVCMOS_DRIVE_REG_COUNT		(0x4)
+#define CTRLMMR_LVCMOS_DRIVE_DEFAULT_VAL	(0xD)
+
 /*
  * The CTRL_MMR0 memory space is divided into several equally-spaced
  * partitions, so defining the partition size allows us to determine

@@ -169,6 +169,34 @@ void setup_dss_credentials(void)
 	*((unsigned int *)(CSL_DSS0_VID1_BASE + 0x3C)) = 0xFFF0800; /* 50000 */
 	*((unsigned int *)(CSL_DSS0_VID2_BASE + 0x3C)) = 0xFFF0800; /* 60000 */
 }
+
+static void j721e_setup_drive_strength(void)
+{
+	u8 i, do_wa = 0;
+
+	/*
+	 * 0x0 in LVCMOS drive strength in any of the registers imply a bad
+	 * sample, So, mark such a sample to be reprogrammed.
+	 */
+	for (i = 0; i < CTRLMMR_LVCMOS_DRIVE_REG_COUNT; i++) {
+		if (!readl(CTRLMMR_LVCMOS_DRIVE_H_BASE + (i * 0x4)) ||
+		    !readl(CTRLMMR_LVCMOS_DRIVE_V_BASE + (i * 0x4))) {
+			do_wa = 1;
+			break;
+		}
+	}
+
+	/* Apply Workaround for ALL registers assume bad strength programming */
+	if (do_wa == 1) {
+		for (i = 0; i < CTRLMMR_LVCMOS_DRIVE_REG_COUNT; i++) {
+			writel(CTRLMMR_LVCMOS_DRIVE_DEFAULT_VAL,
+			       CTRLMMR_LVCMOS_DRIVE_H_BASE + (i * 0x4));
+			writel(CTRLMMR_LVCMOS_DRIVE_DEFAULT_VAL,
+			       CTRLMMR_LVCMOS_DRIVE_V_BASE + (i * 0x4));
+		}
+	}
+}
+
 #endif
 
 void board_init_f(ulong dummy)
@@ -191,6 +219,8 @@ void board_init_f(ulong dummy)
 	setup_initiator_credentials();
 
 	setup_dss_credentials();
+
+	j721e_setup_drive_strength();
 
 	/*
 	 * When running SPL on R5 we are using SRAM for BSS to have global
