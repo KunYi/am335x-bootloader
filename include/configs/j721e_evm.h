@@ -79,7 +79,8 @@
 	"overlayaddr=0x83000000\0"					\
 	"name_kern=Image\0"						\
 	"console=ttyS2,115200n8\0"					\
-	"args_all=setenv optargs earlycon=ns16550a,mmio32,0x02800000\0" \
+	"args_all=setenv optargs earlycon=ns16550a,mmio32,0x02800000 "	\
+		"${mtdparts}\0"						\
 	"run_kern=booti ${loadaddr} ${rd_spec} ${fdtaddr}\0"
 
 #define PARTS_DEFAULT \
@@ -122,12 +123,21 @@
 		"7 /lib/firmware/j7-c66_1-fw "				\
 		"8 /lib/firmware/j7-c71_0-fw "
 
+#ifdef CONFIG_TARGET_J721E_A72_EVM
+#define EXTRA_ENV_J721E_BOARD_SETTINGS_MTD				\
+	"mtdids=" CONFIG_MTDIDS_DEFAULT "\0"				\
+	"mtdparts=" CONFIG_MTDPARTS_DEFAULT "\0"
+#else
+#define EXTRA_ENV_J721E_BOARD_SETTINGS_MTD
+#endif
+
 /* Incorporate settings into the U-Boot environment */
 #define CONFIG_EXTRA_ENV_SETTINGS					\
 	DEFAULT_MMC_TI_ARGS						\
 	EXTRA_ENV_J721E_BOARD_SETTINGS					\
 	EXTRA_ENV_J721E_BOARD_SETTINGS_MMC				\
-	EXTRA_ENV_RPROC_SETTINGS
+	EXTRA_ENV_RPROC_SETTINGS					\
+	EXTRA_ENV_J721E_BOARD_SETTINGS_MTD
 
 /* Now for the remaining common defines */
 #include <configs/ti_armv7_common.h>
@@ -143,5 +153,13 @@
 #endif
 
 #define CONFIG_SUPPORT_EMMC_BOOT
+
+#ifdef CONFIG_ENV_IS_IN_SPI_FLASH
+#define CONFIG_ENV_OFFSET		0x680000
+#define CONFIG_ENV_SECT_SIZE		0x20000
+#define CONFIG_ENV_OFFSET_REDUND        (CONFIG_ENV_OFFSET + \
+					 CONFIG_ENV_SECT_SIZE)
+#define CONFIG_SYS_REDUNDAND_ENVIRONMENT
+#endif
 
 #endif /* __CONFIG_J721E_EVM_H */
