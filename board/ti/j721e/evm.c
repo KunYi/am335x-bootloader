@@ -14,7 +14,6 @@
 #include <asm/io.h>
 #include <spl.h>
 #include <asm/arch/sys_proto.h>
-#include <linux/soc/ti/ti_sci_protocol.h>
 #include <dm/device.h>
 #include <dm/uclass-internal.h>
 #include <dm/pinctrl.h>
@@ -373,15 +372,8 @@ void spl_board_init(void)
 
 void board_preboot_os(void)
 {
-	const struct ti_sci_handle *ti_sci;
-	const struct ti_sci_dev_ops *dops;
 	struct udevice *dev;
 	int ret;
-
-	ti_sci = get_ti_sci_handle();
-	dops = &ti_sci->ops.dev_ops;
-
-	dops->release_exclusive_devices(ti_sci);
 
 	/* baremetal inmates expect the uart1 to be initialized
 	 * Enable main_uart1 pinmux directly
