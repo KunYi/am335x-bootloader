@@ -307,7 +307,6 @@ static void *alloc_priv(int size, uint flags)
 
 int device_probe(struct udevice *dev)
 {
-	struct power_domain pd;
 	const struct driver *drv;
 	int size = 0;
 	int ret;
@@ -388,10 +387,11 @@ int device_probe(struct udevice *dev)
 	if (dev->parent && device_get_uclass_id(dev) != UCLASS_PINCTRL)
 		pinctrl_select_state(dev, "default");
 
+	dev->pd.dev = NULL;
 	if (dev->parent && device_get_uclass_id(dev) != UCLASS_POWER_DOMAIN &&
 	    !(drv->flags & DM_FLAG_DEFAULT_PD_EN_OFF)) {
-		if (!power_domain_get(dev, &pd))
-			power_domain_on(&pd);
+		if (!power_domain_get(dev, &dev->pd))
+			power_domain_on(&dev->pd);
 	}
 
 	ret = uclass_pre_probe_device(dev);

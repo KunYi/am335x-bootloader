@@ -12,12 +12,14 @@
 
 #include <dm/ofnode.h>
 #include <dm/uclass-id.h>
+#include <errno.h>
 #include <fdtdec.h>
 #include <linker_lists.h>
 #include <linux/compat.h>
 #include <linux/kernel.h>
 #include <linux/list.h>
 #include <linux/printk.h>
+#include <power-domain.h>
 
 struct driver_info;
 
@@ -126,6 +128,7 @@ enum {
  *		When CONFIG_DEVRES is enabled, devm_kmalloc() and friends will
  *		add to this list. Memory so-allocated will be freed
  *		automatically when the device is removed / unbound
+ * @pd: Pointer to power_domain controlling this device.
  */
 struct udevice {
 	const struct driver *driver;
@@ -149,6 +152,7 @@ struct udevice {
 #ifdef CONFIG_DEVRES
 	struct list_head devres_head;
 #endif
+	struct power_domain pd;
 };
 
 /* Maximum sequence number supported */
