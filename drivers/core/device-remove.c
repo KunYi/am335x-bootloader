@@ -17,6 +17,8 @@
 #include <dm/uclass-internal.h>
 #include <dm/util.h>
 
+DECLARE_GLOBAL_DATA_PTR;
+
 int device_chld_unbind(struct udevice *dev, struct driver *drv)
 {
 	struct udevice *pos, *n;
@@ -191,6 +193,9 @@ int device_remove(struct udevice *dev, uint flags)
 				__func__, dev->name);
 		}
 	}
+
+	if (dev->pd.dev != NULL && dev != gd->cur_serial_dev)
+		power_domain_off(&dev->pd);
 
 	if (flags_remove(flags, drv->flags)) {
 		device_free(dev);
