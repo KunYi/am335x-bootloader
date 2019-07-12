@@ -105,6 +105,7 @@ void board_fit_image_post_process(void **p_image, size_t *p_size)
 {
 	int result = 0;
 	void *image = *p_image;
+	uint8_t *size_image = image + (*p_size - 4);
 
 	if (strncmp(image + KS2_HS_SEC_TAG_OFFSET, "KEYS", 4)) {
 		printf("No signature found in image!\n");
@@ -120,9 +121,12 @@ void board_fit_image_post_process(void **p_image, size_t *p_size)
 	/*
 	 * Overwrite the image headers after authentication
 	 * and decryption. Update size to reflect removal
-	 * of header.
+	 * of header and restore original file size.
 	 */
-	*p_size -= KS2_HS_SEC_HEADER_LEN;
+	*p_size = *(size_image + 0) <<  0 |
+		  *(size_image + 1) <<  8 |
+		  *(size_image + 2) << 16 |
+		  *(size_image + 3) << 24;
 	memcpy(image, image + KS2_HS_SEC_HEADER_LEN, *p_size);
 
 	/*
