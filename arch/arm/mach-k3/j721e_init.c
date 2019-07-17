@@ -21,6 +21,8 @@
 #include <clk.h>
 #include <remoteproc.h>
 
+extern void reinit_mmc_device(int dev);
+
 #ifdef CONFIG_SPL_BUILD
 static void mmr_unlock(u32 base, u32 partition)
 {
@@ -129,6 +131,11 @@ static void j721e_config_pm_done_callback(void)
 {
 	struct udevice *dev;
 	int ret;
+
+	if (spl_boot_device() == BOOT_DEVICE_MMC1)
+		reinit_mmc_device(0);
+	else if (spl_boot_device() == BOOT_DEVICE_MMC2)
+		reinit_mmc_device(1);
 
 	if (spl_boot_device() == BOOT_DEVICE_HYPERFLASH) {
 		ret = uclass_find_first_device(UCLASS_MTD, &dev);

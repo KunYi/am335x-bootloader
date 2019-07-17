@@ -10,6 +10,8 @@
 #include <spl.h>
 #include "common.h"
 #include <dm.h>
+#include <dm/device-internal.h>
+#include <mmc.h>
 #include <remoteproc.h>
 #include <asm/arch/sys_proto.h>
 #include <linux/soc/ti/ti_sci_protocol.h>
@@ -276,5 +278,23 @@ int fdt_disable_node(void *blob, char *node_path)
 #ifndef CONFIG_SYSRESET
 void reset_cpu(ulong ignored)
 {
+}
+#endif
+
+#ifdef CONFIG_K3_LOAD_SYSFW
+void reinit_mmc_device(int dev)
+{
+	struct mmc *mmc = find_mmc_device(dev);
+
+	if (!mmc)
+		return;
+
+	/* remove the udevice so that it can be re-probed */
+	device_remove(mmc->dev, DM_REMOVE_NORMAL);
+	/* probe the udevice */
+	device_probe(mmc->dev);
+	/* force a reinit of the MMC/SDCard */
+	mmc->has_init = 0;
+	mmc_init(mmc);
 }
 #endif
