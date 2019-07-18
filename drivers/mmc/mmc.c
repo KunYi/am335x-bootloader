@@ -2000,7 +2000,7 @@ static int mmc_select_mode_and_width(struct mmc *mmc, uint card_caps)
 			if (mwt->mode == MMC_HS_400) {
 				err = mmc_select_hs400(mmc);
 				if (err) {
-					printf("Select HS400 failed %d\n", err);
+					pr_err("Select HS400 failed %d\n", err);
 					goto error;
 				}
 			} else {
