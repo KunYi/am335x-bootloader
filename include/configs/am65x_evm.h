@@ -13,6 +13,7 @@
 #include <config_distro_bootcmd.h>
 #include <environment/ti/mmc.h>
 #include <environment/ti/am65x_dfu.h>
+#include <environment/ti/k3_rproc.h>
 
 #define CONFIG_ENV_SIZE			(128 << 10)
 
@@ -151,6 +152,13 @@
 		"run get_overlaystring; "				\
 		"run run_fit\0"
 
+#ifdef DEFAULT_RPROCS
+#undef DEFAULT_RPROCS
+#endif
+#define DEFAULT_RPROCS	""						\
+		"0 /lib/firmware/am65x-mcu-r5f0_0-fw "			\
+		"1 /lib/firmware/am65x-mcu-r5f0_1-fw "
+
 #ifdef CONFIG_TARGET_AM654_A53_EVM
 #define EXTRA_ENV_AM65X_BOARD_SETTINGS_MTD				\
 	"mtdids=" CONFIG_MTDIDS_DEFAULT "\0"				\
@@ -182,6 +190,7 @@
 	EXTRA_ENV_AM65X_BOARD_SETTINGS_EMMC_ANDROID			\
 	EXTRA_ENV_AM65X_BOARD_SETTINGS_MTD				\
 	EXTRA_ENV_AM65X_BOARD_SETTINGS_UBI				\
+	EXTRA_ENV_RPROC_SETTINGS					\
 	DFUARGS
 
 #define CONFIG_SUPPORT_EMMC_BOOT
