@@ -102,6 +102,7 @@
 		ranges;
 
 		ti,sci-dev-id = <119>;
+		u-boot,dm-spl;
 
 		mcu_ringacc: ringacc@2b800000 {
 			compatible = "ti,am654-navss-ringacc";
@@ -116,6 +117,7 @@
 			ti,dma-ring-reset-quirk;
 			ti,sci = <&dmsc>;
 			ti,sci-dev-id = <195>;
+			u-boot,dm-spl;
 		};
 
 		mcu_udmap: udmap@285c0000 {
@@ -138,6 +140,7 @@
 						<0x4>; /* RX_CHAN */
 			ti,sci-rm-range-rflow = <0x5>; /* GP RFLOW */
 			dma-coherent;
+			u-boot,dm-spl;
 		};
 	};
 
