@@ -308,6 +308,7 @@ int dma_send(struct dma *dma, void *src, size_t len, void *metadata);
  */
 int dma_get_device(u32 transfer_type, struct udevice **devp);
 
+#if CONFIG_IS_ENABLED(DMA)
 /*
  * dma_memcpy - try to use DMA to do a mem copy which will be
  *		much faster than CPU mem copy
@@ -319,5 +320,11 @@ int dma_get_device(u32 transfer_type, struct udevice **devp);
 	     transferred and on failure return error code.
  */
 int dma_memcpy(void *dst, void *src, size_t len);
+#else
+static inline int dma_memcpy(void *dst, void *src, size_t len)
+{
+	return -ENOTSUPP;
+}
+#endif
 
 #endif	/* _DMA_H_ */
