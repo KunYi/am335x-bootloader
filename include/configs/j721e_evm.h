@@ -122,6 +122,41 @@
 	"get_kern_mmc=load mmc ${bootpart} ${loadaddr} "		\
 		"${bootdir}/${name_kern}\0"
 
+/* Commands for booting Android from eMMC */
+#define EXTRA_ENV_J721E_BOARD_SETTINGS_EMMC_ANDROID			\
+	"check_dofastboot="						\
+		"if test ${dofastboot} -eq 1; then "			\
+			"echo Boot fastboot requested, "		\
+				"resetting dofastboot ...;"		\
+			"setenv dofastboot 0; env save; "		\
+			"echo Booting into fastboot ...; "		\
+			"fastboot "					\
+			__stringify(CONFIG_FASTBOOT_USB_DEV) "; "	\
+		"fi\0"							\
+	"check_android="						\
+		"setenv mmcdev 0; "					\
+		"env delete boot_start; "				\
+		"part start mmc ${mmcdev} boot boot_start; "		\
+		"if test \"$boot_start\" = \"\"; then "			\
+			"env set is_android 0; "			\
+		"else "							\
+			"env set is_android 1; "			\
+		"fi; "							\
+		"env delete boot_start\0"				\
+	"emmc_android_boot="						\
+		"echo Trying to boot Android from eMMC ...; "		\
+		"run update_to_fit; "					\
+		"setenv eval_bootargs setenv bootargs $bootargs; "	\
+		"run eval_bootargs; "					\
+		"setenv mmcdev 0; "					\
+		"mmc dev $mmcdev; "					\
+		"mmc rescan; "						\
+		"part start mmc ${mmcdev} boot boot_start; "		\
+		"part size mmc ${mmcdev} boot boot_size; "		\
+		"mmc read ${fit_loadaddr} ${boot_start} ${boot_size}; "	\
+		"run get_overlaystring; "				\
+		"run run_fit\0"
+
 #ifdef DEFAULT_RPROCS
 #undef DEFAULT_RPROCS
 #endif
@@ -143,8 +178,10 @@
 /* Incorporate settings into the U-Boot environment */
 #define CONFIG_EXTRA_ENV_SETTINGS					\
 	DEFAULT_MMC_TI_ARGS						\
+	DEFAULT_FIT_TI_ARGS						\
 	EXTRA_ENV_J721E_BOARD_SETTINGS					\
 	EXTRA_ENV_J721E_BOARD_SETTINGS_MMC				\
+	EXTRA_ENV_J721E_BOARD_SETTINGS_EMMC_ANDROID			\
 	EXTRA_ENV_RPROC_SETTINGS					\
 	EXTRA_ENV_J721E_BOARD_SETTINGS_MTD
 
