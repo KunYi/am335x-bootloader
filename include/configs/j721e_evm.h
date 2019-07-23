@@ -87,6 +87,15 @@
 	/* Linux partitions */ \
 	"uuid_disk=${uuid_gpt_disk};" \
 	"name=rootfs,start=0,size=-,uuid=${uuid_gpt_rootfs}\0" \
+	/* Android partitions */ \
+	"partitions_android=" \
+	"uuid_disk=${uuid_gpt_disk};" \
+	"name=bootloader,start=5M,size=8M,uuid=${uuid_gpt_bootloader};" \
+	"name=tiboot3,start=4M,size=1M,uuid=${uuid_gpt_tiboot3};" \
+	"name=boot,start=13M,size=40M,uuid=${uuid_gpt_boot};" \
+	"name=vendor,size=1024M,uuid=${uuid_gpt_vendor};" \
+	"name=system,size=2048M,uuid=${uuid_gpt_system};" \
+	"name=userdata,size=-,uuid=${uuid_gpt_userdata}\0" \
 
 /* U-Boot MMC-specific configuration */
 #define EXTRA_ENV_J721E_BOARD_SETTINGS_MMC				\
