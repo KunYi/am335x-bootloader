@@ -210,6 +210,7 @@
 		clocks = <&k3_clks 151 0>, <&k3_clks 151 1>;
 		clock-names = "wkupclk", "refclk";
 		#phy-cells = <0>;
+		ti,dis-chg-det-quirk;
 	};
 
 	dwc3_1: dwc3@4020000 {
@@ -247,6 +248,7 @@
 		clocks = <&k3_clks 152 0>, <&k3_clks 152 1>;
 		clock-names = "wkupclk", "refclk";
 		#phy-cells = <0>;
+		ti,dis-chg-det-quirk;
 	};
 
 	main_i2c0: i2c@2000000 {
