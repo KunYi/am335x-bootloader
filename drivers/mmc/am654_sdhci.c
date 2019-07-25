@@ -225,6 +225,7 @@ static int am654_sdhci_set_ios_post(struct sdhci_host *host)
 			switch (speed) {
 			case 200000000:
 				freqsel = 0x0;
+				break;
 			default:
 				freqsel = 0x4;
 			}
