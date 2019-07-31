@@ -441,6 +441,7 @@
 		cdns,tchsh-ns = <60>;
 		cdns,tslch-ns = <60>;
 		cdns,read-delay = <0>;
+		cdns,phy-mode;
 		#address-cells = <1>;
 		#size-cells = <1>;
 		u-boot,dm-spl;
