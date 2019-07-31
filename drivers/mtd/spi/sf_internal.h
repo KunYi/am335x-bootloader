@@ -66,6 +66,8 @@ struct flash_info {
 #define SPI_NOR_SKIP_SFDP	BIT(13)	/* Skip parsing of SFDP tables */
 #define USE_CLSR		BIT(14)	/* use CLSR command */
 #define SPI_NOR_OCTAL_READ      BIT(15) /* Flash supports Octal Read */
+	int	(*change_mode)(struct spi_nor *nor, enum spi_nor_mode mode);
+	void	(*adjust_op)(struct spi_nor *nor, enum spi_nor_mode mode);
 };
 
 extern const struct flash_info spi_nor_ids[];
