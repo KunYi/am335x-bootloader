@@ -271,6 +271,7 @@
 		cdns,read-delay = <0>;
 		#address-cells = <1>;
 		#size-cells = <1>;
+		cdns,phy-mode;
 		u-boot,dm-spl;
 	};
 };
