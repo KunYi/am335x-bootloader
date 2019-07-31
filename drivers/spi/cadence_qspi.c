@@ -234,49 +234,47 @@ static int cadence_spi_mem_exec_op(struct spi_slave *spi,
 	cadence_qspi_apb_chipselect(base, spi_chip_select(spi->dev),
 				    plat->is_decoded_cs);
 
-		if (op->data.dir == SPI_MEM_DATA_IN) {
-			/* read */
-			/* Use STIG if no address. */
-			if (!op->addr.nbytes)
-				mode = CQSPI_STIG_READ;
-			else
-				mode = CQSPI_READ;
-		} else {
+	if (op->data.dir == SPI_MEM_DATA_IN) {
+		/* read */
+		/* Use STIG if no address. */
+		if (!op->addr.nbytes)
+			mode = CQSPI_STIG_READ;
+		else
+			mode = CQSPI_READ;
+
+		err = cadence_qspi_apb_read_setup(plat, op);
+		if (err)
+			return err;
+	} else {
 			/* write */
-			if (!op->addr.nbytes)
-				mode = CQSPI_STIG_WRITE;
-			else
-				mode = CQSPI_WRITE;
-		}
+		if (!op->addr.nbytes)
+			mode = CQSPI_STIG_WRITE;
+		else
+			mode = CQSPI_WRITE;
 
-		switch (mode) {
-		case CQSPI_STIG_READ:
-			err = cadence_qspi_apb_command_read(
-				base, op);
+		err = cadence_qspi_apb_write_setup(plat, op);
+		if (err)
+			return err;
+	}
 
+	switch (mode) {
+	case CQSPI_STIG_READ:
+		err = cadence_qspi_apb_command_read(base, op);
+
+	break;
+	case CQSPI_STIG_WRITE:
+		err = cadence_qspi_apb_command_write(base, op);
+	break;
+	case CQSPI_READ:
+		err = cadence_qspi_apb_read_execute(plat, op);
+	break;
+	case CQSPI_WRITE:
+		err = cadence_qspi_apb_write_execute(plat, op);
+	break;
+	default:
+		err = -1;
 		break;
-		case CQSPI_STIG_WRITE:
-			err = cadence_qspi_apb_command_write(base, op);
-		break;
-		case CQSPI_READ:
-			err = cadence_qspi_apb_read_setup(plat, op);
-			if (!err) {
-				err = cadence_qspi_apb_read_execute
-				(plat, op);
-			}
-		break;
-		case CQSPI_WRITE:
-			err = cadence_qspi_apb_write_setup
-				(plat, op);
-			if (!err) {
-				err = cadence_qspi_apb_write_execute
-				(plat, op);
-			}
-		break;
-		default:
-			err = -1;
-			break;
-		}
+	}
 
 	return err;
 }
