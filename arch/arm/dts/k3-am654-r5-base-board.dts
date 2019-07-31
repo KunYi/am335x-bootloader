@@ -253,7 +253,7 @@
 	status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&mcu_fss0_ospi0_pins_default>;
-	power-domains = <&k3_pds 55 TI_SCI_PD_SHARED>;
+	power-domains = <&k3_pds 55 TI_SCI_PD_EXCLUSIVE>;
 	u-boot,dm-spl;
 	reg = <0x0 0x47040000 0x0 0x100>,
 	      <0x0 0x50000000 0x0 0x8000000>;
