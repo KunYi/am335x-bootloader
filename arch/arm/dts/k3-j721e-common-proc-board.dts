@@ -130,6 +130,12 @@
 			J721E_IOPAD(0x2ac, PIN_INPUT, 0)
 		>;
 	};
+
+	main_usbss1_pins_default: main_usbss1_pins_default {
+		pinctrl-single,pins = <
+			J721E_IOPAD(0x214, PIN_OUTPUT, 4) /* (V4) MCAN1_TX.USB1_DRVVBUS */
+		>;
+	};
 };
 
 &mcu_cpsw {
@@ -176,4 +182,15 @@
 		gpio-controller;
 		#gpio-cells = <2>;
 	};
+};
+
+&usbss1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_usbss1_pins_default>;
+	ti,usb2-only;
+};
+
+&usb1 {
+	dr_mode = "host";
+	maximum-speed = "high-speed";
 };
