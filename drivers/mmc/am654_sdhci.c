@@ -88,6 +88,11 @@ struct am654_sdhci_plat {
 	bool dll_on;
 };
 
+struct am654_driver_data {
+	const struct sdhci_ops *ops;
+	u32 flags;
+};
+
 static int am654_sdhci_execute_tuning(struct mmc *mmc, u8 opcode)
 {
 	struct mmc_cmd cmd;
@@ -256,6 +261,16 @@ const struct sdhci_ops am654_sdhci_ops = {
 	.platform_execute_tuning = &am654_sdhci_execute_tuning,
 };
 
+const struct am654_driver_data am654_drv_data = {
+	.ops = &am654_sdhci_ops,
+	.flags = IOMUX_PRESENT | FREQSEL_2_BIT | DLL_PRESENT,
+};
+
+const struct am654_driver_data j721e_8bit_drv_data = {
+	.ops = &am654_sdhci_ops,
+	.flags = DLL_PRESENT,
+};
+
 static int j721e_4bit_sdhci_set_ios_post(struct sdhci_host *host)
 {
 	struct udevice *dev = host->mmc->dev;
@@ -274,6 +289,11 @@ const struct sdhci_ops j721e_4bit_sdhci_ops = {
 	.set_ios_post		= &j721e_4bit_sdhci_set_ios_post,
 	.set_control_reg	= &am654_sdhci_set_control_reg,
 	.platform_execute_tuning = &am654_sdhci_execute_tuning,
+};
+
+const struct am654_driver_data j721e_4bit_drv_data = {
+	.ops = &j721e_4bit_sdhci_ops,
+	.flags = IOMUX_PRESENT,
 };
 
 int am654_sdhci_init(struct am654_sdhci_plat *plat)
@@ -326,6 +346,8 @@ int am654_sdhci_init(struct am654_sdhci_plat *plat)
 
 static int am654_sdhci_probe(struct udevice *dev)
 {
+	struct am654_driver_data *drv_data =
+			(struct am654_driver_data *)dev_get_driver_data(dev);
 	struct am654_sdhci_plat *plat = dev_get_platdata(dev);
 	struct mmc_uclass_priv *upriv = dev_get_uclass_priv(dev);
 	struct sdhci_host *host = dev_get_priv(dev);
@@ -382,7 +404,8 @@ static int am654_sdhci_probe(struct udevice *dev)
 			      AM654_SDHCI_MIN_FREQ);
 	if (ret)
 		return ret;
-	host->ops = (struct sdhci_ops *)dev_get_driver_data(dev);
+
+	host->ops = drv_data->ops;
 	host->mmc->priv = host;
 	upriv->mmc = host->mmc;
 
@@ -418,17 +441,6 @@ static int am654_sdhci_ofdata_to_platdata(struct udevice *dev)
 	host->name = dev->name;
 	host->ioaddr = (void *)dev_read_addr(dev);
 	plat->non_removable = dev_read_bool(dev, "non-removable");
-
-	if (device_is_compatible(dev, "ti,am654-sdhci-5.1") ||
-	    device_is_compatible(dev, "ti,j721e-sdhci-8bit"))
-		plat->flags |= DLL_PRESENT;
-
-	if (device_is_compatible(dev, "ti,am654-sdhci-5.1") ||
-	    device_is_compatible(dev, "ti,j721e-sdhci-4bit"))
-		plat->flags |= IOMUX_PRESENT;
-
-	if (device_is_compatible(dev, "ti,am654-sdhci-5.1"))
-		plat->flags |= FREQSEL_2_BIT;
 
 	ret = dev_read_u32(dev, "ti,otap-del-sel", &plat->otap_del_sel);
 	if (ret)
@@ -475,7 +487,11 @@ static int am654_sdhci_ofdata_to_platdata(struct udevice *dev)
 
 static int am654_sdhci_bind(struct udevice *dev)
 {
+	struct am654_driver_data *drv_data =
+			(struct am654_driver_data *)dev_get_driver_data(dev);
 	struct am654_sdhci_plat *plat = dev_get_platdata(dev);
+
+	plat->flags = drv_data->flags;
 
 	return sdhci_bind(dev, &plat->mmc, &plat->cfg);
 }
@@ -483,15 +499,15 @@ static int am654_sdhci_bind(struct udevice *dev)
 static const struct udevice_id am654_sdhci_ids[] = {
 	{
 		.compatible = "ti,am654-sdhci-5.1",
-		.data = (ulong)&am654_sdhci_ops,
+		.data = (ulong)&am654_drv_data,
 	},
 	{
 		.compatible = "ti,j721e-sdhci-8bit",
-		.data = (ulong)&am654_sdhci_ops,
+		.data = (ulong)&j721e_8bit_drv_data,
 	},
 	{
 		.compatible = "ti,j721e-sdhci-4bit",
-		.data = (ulong)&j721e_4bit_sdhci_ops,
+		.data = (ulong)&j721e_4bit_drv_data,
 	},
 	{ }
 };
