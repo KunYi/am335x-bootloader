@@ -177,3 +177,7 @@
 &mcu_udmap {
 	u-boot,dm-spl;
 };
+
+&usbss0 {
+	status = "disabled";
+};
