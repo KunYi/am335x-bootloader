@@ -330,7 +330,6 @@ static int prueth_config_rgmiidelay(struct prueth *prueth,
 				    ofnode eth_np)
 {
 	struct regmap *ctrl_mmr;
-	u32 val;
 	int ret = 0;
 	ofnode node;
 	u32 tmp[2];
@@ -353,12 +352,7 @@ static int prueth_config_rgmiidelay(struct prueth *prueth,
 		return -EINVAL;
 	}
 
-	if (ofnode_read_bool(eth_np, "enable-rgmii-delay"))
-		val = 0;
-	else
-		val = ICSSG_CTRL_RGMII_ID_MODE;
-
-	regmap_update_bits(ctrl_mmr, tmp[1], ICSSG_CTRL_RGMII_ID_MODE, val);
+	regmap_update_bits(ctrl_mmr, tmp[1], ICSSG_CTRL_RGMII_ID_MODE, 0);
 
 	return 0;
 }
