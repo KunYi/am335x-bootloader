@@ -48,8 +48,8 @@ void setup_initiator_credentials(void)
 	writel(DMSC_QOS_PVU_CTX(2), DMSC_QOS_DSS_DMA_MAP + 1 * 4);
 
 	/* DSS.VID2 */
-	writel(DMSC_QOS_PVU_CTX(2), DMSC_QOS_DSS_DMA_MAP + 2 * 4);
-	writel(DMSC_QOS_PVU_CTX(2), DMSC_QOS_DSS_DMA_MAP + 3 * 4);
+	writel(DMSC_QOS_PVU_CTX(2), DMSC_QOS_DSS_DMA_MAP + 4 * 4);
+	writel(DMSC_QOS_PVU_CTX(2), DMSC_QOS_DSS_DMA_MAP + 5 * 4);
 
 	/* DSS.VIDL2 */
 	writel(DMSC_QOS_PVU_CTX(2), DMSC_QOS_DSS_DMA_MAP + 6 * 4);
@@ -61,8 +61,8 @@ void setup_initiator_credentials(void)
 	writel(DMSC_QOS_PVU_CTX(3), DMSC_QOS_MMC0_WR_MAP);
 
 	/* DSS.VIDL1 */
-	writel(DMSC_QOS_PVU_CTX(3), DMSC_QOS_DSS_DMA_MAP + 4 * 4);
-	writel(DMSC_QOS_PVU_CTX(3), DMSC_QOS_DSS_DMA_MAP + 5 * 4);
+	writel(DMSC_QOS_PVU_CTX(3), DMSC_QOS_DSS_DMA_MAP + 2 * 4);
+	writel(DMSC_QOS_PVU_CTX(3), DMSC_QOS_DSS_DMA_MAP + 3 * 4);
 
 	/* GPU OS_id=0, chanid=[0-3] */
 	for (i = 0; i < 4; i++) {
