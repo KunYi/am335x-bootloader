@@ -192,6 +192,12 @@ static const struct {
 		0,
 	},
 	{
+		AM65X_EVM_SERDES_BRD_DET,
+		"SER-PCIEUSBEVM  ",
+		"k3-am654-pcie-usb3.dtbo",
+		0,
+	},
+	{
 		AM65X_EVM_LCD_BRD_DET,
 		"OLDI-LCD1EVM",
 		"k3-am654-evm-oldi-lcd1evm.dtbo",
