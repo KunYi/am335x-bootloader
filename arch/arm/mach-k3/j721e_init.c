@@ -301,14 +301,27 @@ void board_init_f(ulong dummy)
 
 u32 spl_boot_mode(const u32 boot_device)
 {
-	switch (boot_device) {
-	case BOOT_DEVICE_MMC1:
-		return MMCSD_MODE_EMMCBOOT;
-	case BOOT_DEVICE_MMC2:
-		return MMCSD_MODE_FS;
-	default:
+	u32 wkup_devstat = readl(CTRLMMR_WKUP_DEVSTAT);
+	u32 main_devstat;
+	u32 bootmode;
+
+	if (wkup_devstat & WKUP_DEVSTAT_MCU_OMLY_MASK) {
+		printf("ERROR: MCU only boot is not yet supported\n");
 		return MMCSD_MODE_RAW;
 	}
+
+	main_devstat = readl(CTRLMMR_MAIN_DEVSTAT);
+
+	bootmode = (wkup_devstat & WKUP_DEVSTAT_PRIMARY_BOOTMODE_MASK) >>
+			WKUP_DEVSTAT_PRIMARY_BOOTMODE_SHIFT;
+
+	bootmode |= (main_devstat & MAIN_DEVSTAT_BOOT_MODE_B_MASK) <<
+			BOOT_MODE_B_SHIFT;
+
+	if (bootmode == BOOT_DEVICE_MMC1)
+		return MMCSD_MODE_EMMCBOOT;
+	else
+		return MMCSD_MODE_FS;
 }
 
 static u32 __get_backup_bootmedia(u32 main_devstat)
