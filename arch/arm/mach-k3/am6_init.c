@@ -21,6 +21,58 @@
 extern void reinit_mmc_device(int dev);
 
 #ifdef CONFIG_SPL_BUILD
+#ifdef CONFIG_TI_SECURE_DEVICE
+struct fwl_data {
+	const char *name;
+	u16 fwl_id;
+	u16 regions;
+} main_cbass_fwls[] = {
+	{ "MMCSD1_CFG", 2057, 1 },
+	{ "MMCSD0_CFG", 2058, 1 },
+	{ "USB3SS0_SLV0", 2176, 2 },
+	{ "PCIE0_SLV", 2336, 8 },
+	{ "PCIE1_SLV", 2337, 8 },
+	{ "PCIE0_CFG", 2688, 1 },
+	{ "PCIE1_CFG", 2689, 1 },
+}, mcu_cbass_fwls[] = {
+	{ "MCU_ARMSS0_CORE0_SLV", 1024, 1 },
+	{ "MCU_ARMSS0_CORE1_SLV", 1028, 1 },
+	{ "MCU_FSS0_S1", 1033, 8 },
+	{ "MCU_FSS0_S0", 1036, 8 },
+	{ "MCU_CPSW0", 1220, 1 },
+};
+
+static void remove_fwl_configs(struct fwl_data *fwl_data, size_t fwl_data_size)
+{
+	struct ti_sci_msg_fwl_region region;
+	struct ti_sci_fwl_ops *fwl_ops;
+	struct ti_sci_handle *ti_sci;
+	size_t i, j;
+
+	ti_sci = get_ti_sci_handle();
+	fwl_ops = &ti_sci->ops.fwl_ops;
+	for (i = 0; i < fwl_data_size; i++) {
+		for (j = 0; j <  fwl_data[i].regions; j++) {
+			region.fwl_id = fwl_data[i].fwl_id;
+			region.region = j;
+			region.n_permission_regs = 3;
+
+			fwl_ops->get_fwl_region(ti_sci, &region);
+
+			if (region.control != 0) {
+				pr_debug("Attempting to disable firewall %5d (%25s)\n",
+					 region.fwl_id, fwl_data[i].name);
+				region.control = 0;
+
+				if (fwl_ops->set_fwl_region(ti_sci, &region))
+					pr_err("Could not disable firewall %5d (%25s)\n",
+					       region.fwl_id, fwl_data[i].name);
+			}
+		}
+	}
+}
+#endif /* CONFIG_TI_SECURE_DEVICE */
+
 static void mmr_unlock(u32 base, u32 partition)
 {
 	/* Translate the base address */
@@ -156,6 +208,11 @@ void board_init_f(ulong dummy)
 #ifdef CONFIG_K3_LOAD_SYSFW
 	/* Output System Firmware version info */
 	k3_sysfw_loader_print_ver();
+	/* Disable rom configured firewalls right after loading sysfw */
+#ifdef CONFIG_TI_SECURE_DEVICE
+	remove_fwl_configs(main_cbass_fwls, ARRAY_SIZE(main_cbass_fwls));
+	remove_fwl_configs(mcu_cbass_fwls, ARRAY_SIZE(mcu_cbass_fwls));
+#endif
 #endif
 
 	/* Perform EEPROM-based board detection */
