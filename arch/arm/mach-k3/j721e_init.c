@@ -20,6 +20,7 @@
 #include <dm/pinctrl.h>
 #include <clk.h>
 #include <remoteproc.h>
+#include "../../../board/ti/common/board_detect.h"
 
 extern void reinit_mmc_device(int dev);
 
@@ -209,6 +210,10 @@ static void j721e_setup_drive_strength(void)
 
 void board_init_f(ulong dummy)
 {
+#if defined(CONFIG_CPU_V7R) && defined(CONFIG_K3_AVS0)
+	int offset;
+	u32 val, dflt = 0;
+#endif
 #if defined(CONFIG_K3_J721E_DDRSS) || defined(CONFIG_K3_LOAD_SYSFW)
 	struct udevice *dev;
 	int ret;
@@ -287,6 +292,17 @@ void board_init_f(ulong dummy)
 	do_board_detect();
 
 #if defined(CONFIG_CPU_V7R) && defined(CONFIG_K3_AVS0)
+	if (board_ti_k3_is("J721EX-PM1-SOM")) {
+		offset = fdt_node_offset_by_compatible(gd->fdt_blob, -1,
+						       "ti,am654-vtm");
+		val = fdt_getprop_u32_default_node(gd->fdt_blob, offset, 0,
+						   "som1-supply-2", dflt);
+		do_fixup_by_compat_u32((void *)gd->fdt_blob, "ti,am654-vtm",
+				       "vdd-supply-2", val, 0);
+		val = fdt_getprop_u32_default_node(gd->fdt_blob, offset, 0,
+						   "vdd-supply-2", dflt);
+	}
+
 	ret = uclass_get_device(UCLASS_AVS, 0, &dev);
 	if (ret)
 		printf("AVS init failed: %d\n", ret);
