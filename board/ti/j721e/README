@@ -124,27 +124,27 @@ Sources:
 	Branch: master
 
 2. ATF:
-	Tree: https://github.com/ARM-software/arm-trusted-firmware.git
-	Branch: master
+	Tree: http://git.ti.com/git/atf/arm-trusted-firmware.git
+	Branch: ti-atf
 
 3. OPTEE:
-	Tree: https://github.com/OP-TEE/optee_os.git
-	Branch: master
+	Tree: http://git.ti.com/git/optee/ti-optee-os.git
+	Branch: ti_optee_os
 
 4. U-Boot:
-	Tree: https://gitlab.denx.de/u-boot/u-boot
-	Branch: master
+	Tree: http://git.ti.com/ti-u-boot/ti-u-boot
+	Branch: ti-u-boot-2019.01
 
 Build procedure:
 ----------------
 1. SYSFW:
-$ make CROSS_COMPILE=arm-linux-gnueabihf-
+$ make CROSS_COMPILE=arm-linux-gnueabihf- SOC=j721e
 
 2. ATF:
 $ make CROSS_COMPILE=aarch64-linux-gnu- ARCH=aarch64 PLAT=k3 TARGET_BOARD=generic SPD=opteed
 
 3. OPTEE:
-$ make PLATFORM=k3-j721e CFG_ARM64_core=y
+$ make CROSS_COMPILE64=aarch64-linux-gnu- PLATFORM=k3-j721e CFG_ARM64_core=y all
 
 4. U-Boot:
 
@@ -159,7 +159,7 @@ $ make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- ATF=<path to ATF dir>/build/k3/
 Target Images
 --------------
 Copy the below images to an SD card and boot:
-- sysfw.itb from step 1
+- Rename sysfw-j721e-evm.itb from step 1 to sysfw.itb
 - tiboot3.bin from step 4.1
 - tispl.bin, u-boot.img from 4.2
 
