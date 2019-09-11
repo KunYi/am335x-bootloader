@@ -173,10 +173,6 @@ void setup_dss_credentials(void)
 	/* Setup NB configuration */
 	*((unsigned int *)(CSL_NAVSS0_NBSS_NB0_CFG_MMRS_BASE + 0x10)) = 2;
 	*((unsigned int *)(CSL_NAVSS0_NBSS_NB1_CFG_MMRS_BASE + 0x10)) = 2;
-	*((unsigned int *)(CSL_DSS0_VIDL1_BASE + 0x3C)) = 0xFFF0800; /* 20000 */
-	*((unsigned int *)(CSL_DSS0_VIDL2_BASE + 0x3C)) = 0xFFF0800; /* 30000 */
-	*((unsigned int *)(CSL_DSS0_VID1_BASE + 0x3C)) = 0xFFF0800; /* 50000 */
-	*((unsigned int *)(CSL_DSS0_VID2_BASE + 0x3C)) = 0xFFF0800; /* 60000 */
 }
 
 static void j721e_setup_drive_strength(void)
