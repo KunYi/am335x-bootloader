@@ -184,6 +184,7 @@
 
 &usbss0 {
 	u-boot,dm-spl;
+	ti,usb2-only;
 };
 
 &usb0 {
