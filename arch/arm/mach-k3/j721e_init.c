@@ -153,21 +153,32 @@ static void j721e_config_pm_done_callback(void)
 #ifdef CONFIG_CPU_V7R
 void setup_dss_credentials(void)
 {
-	unsigned int ch, group;
-	phys_addr_t *pMapReg, *pMap1Reg, *pMap2Reg;
+	unsigned int channel, group;
 
-	/* set order ID for DSS masters, there are 10 masters in DSS */
-	for (ch = 0; ch < 10; ch++) {
-		pMapReg = (phys_addr_t *)((uintptr_t)DSS_DMA_QOS_BASE + 0x100 + (4 * ch));
-		pMapReg[ch] &= ~(GENMASK(7, 4));
-		pMapReg[ch] |= (0x9 << 4);  /* Set orderid=9 */
+	/* two master ports: dma and fbdc */
+	/* two groups: SRAM and DDR */
+	/* 10 channels: (pipe << 1) | is_second_buffer */
+
+	/* master port 1 (dma) */
+
+	for (group = 0; group < 2; ++group) {
+		writel(0x76543210, QOS_DSS0_DMA_CBASS_GRP_MAP1(group));
+		writel(0xfedcba98, QOS_DSS0_DMA_CBASS_GRP_MAP2(group));
 	}
 
-	for (group = 0; group < 2; group++) {
-		pMap1Reg = (phys_addr_t *)((uintptr_t)DSS_DMA_QOS_BASE + 0x0 + (8 * group));
-		pMap2Reg = (phys_addr_t *)((uintptr_t)DSS_DMA_QOS_BASE + 0x4 + (8 * group));
-		*pMap1Reg = 0x76543210;
-		*pMap2Reg = 0xfedcba98;
+	for (channel = 0; channel < 10; ++channel) {
+		writel(0x9 << 4, QOS_DSS0_DMA_CBASS_MAP(channel));
+	}
+
+	/* master port 2 (fbdc) */
+
+	for (group = 0; group < 2; ++group) {
+		writel(0x76543210, QOS_DSS0_FBDC_CBASS_GRP_MAP1(group));
+		writel(0xfedcba98, QOS_DSS0_FBDC_CBASS_GRP_MAP2(group));
+	}
+
+	for (channel = 0; channel < 10; ++channel) {
+		writel(0x9 << 4, QOS_DSS0_FBDC_CBASS_MAP(channel));
 	}
 
 	/* Setup NB configuration */
