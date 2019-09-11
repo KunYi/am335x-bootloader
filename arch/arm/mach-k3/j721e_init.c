@@ -167,7 +167,11 @@ void setup_dss_credentials(void)
 	}
 
 	for (channel = 0; channel < 10; ++channel) {
-		writel(0x9 << 4, QOS_DSS0_DMA_CBASS_MAP(channel));
+		u8 orderid;
+
+		orderid = 0xf - channel;
+
+		writel((orderid << 4), QOS_DSS0_DMA_CBASS_MAP(channel));
 	}
 
 	/* master port 2 (fbdc) */
@@ -178,7 +182,11 @@ void setup_dss_credentials(void)
 	}
 
 	for (channel = 0; channel < 10; ++channel) {
-		writel(0x9 << 4, QOS_DSS0_FBDC_CBASS_MAP(channel));
+		u8 orderid;
+
+		orderid = 0xf - channel;
+
+		writel((orderid << 4), QOS_DSS0_FBDC_CBASS_MAP(channel));
 	}
 
 	/* Setup NB configuration */
