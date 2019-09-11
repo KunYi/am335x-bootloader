@@ -114,6 +114,10 @@
 };
 
 &wkup_i2c0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&wkup_i2c0_pins_default>;
+	clock-frequency = <400000>;
+
 	tps659413a: tps659413a@48 {
 		reg = <0x48>;
 		compatible = "ti,tps659413";
