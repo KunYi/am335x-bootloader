@@ -712,6 +712,11 @@ S:	Maintained
 T:	git git://git.denx.de/u-boot-ubi.git
 F:	drivers/mtd/ubi/
 
+UFS
+M:	Faiz Abbas <faiz_abbas@ti.com>
+S:	Maintained
+F:	drivers/ufs/
+
 USB
 M:	Marek Vasut <marex@denx.de>
 S:	Maintained
