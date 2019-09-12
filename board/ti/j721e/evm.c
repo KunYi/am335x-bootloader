@@ -155,13 +155,15 @@ int do_board_detect(void)
 
 static void setup_board_eeprom_env(void)
 {
-	char *name = "j721e";
+	char *name = "J721EX-PM2-SOM";
 
 	if (do_board_detect())
 		goto invalid_eeprom;
 
-	if (board_is_j721e_som())
-		name = "j721e";
+	if (board_ti_k3_is("J721EX-PM1-SOM"))
+		name = "J721EX-PM1-SOM";
+	else if (board_ti_k3_is("J721EX-PM2-SOM"))
+		name = "J721EX-PM2-SOM";
 	else
 		printf("Unidentified board claims %s in eeprom header\n",
 		       board_ti_get_name());
