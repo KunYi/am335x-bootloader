@@ -73,9 +73,11 @@
 
 /* U-Boot general configuration */
 #define EXTRA_ENV_J721E_BOARD_SETTINGS					\
-	"default_device_tree=" CONFIG_DEFAULT_DEVICE_TREE ".dtb\0"	\
 	"findfdt="							\
-		"setenv fdtfile ${default_device_tree};"		\
+		"if test $board_name = J721EX-PM2-SOM; then "		\
+			"setenv fdtfile k3-j721e-common-proc-board.dtb; fi;" \
+		"if test $board_name = J721EX-PM1-SOM; then "		\
+			"setenv fdtfile k3-j721e-proc-board-tps65917.dtb; fi;" \
 		"setenv overlay_files ${name_overlays}\0"		\
 	"loadaddr=0x80080000\0"						\
 	"fdtaddr=0x82000000\0"						\
