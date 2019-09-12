@@ -140,20 +140,11 @@ static void scsi_setup_inquiry(struct scsi_cmd *pccb)
 	pccb->msgout[0] = SCSI_IDENTIFY; /* NOT USED */
 }
 
-#ifdef CONFIG_BLK
 static ulong scsi_read(struct udevice *dev, lbaint_t blknr, lbaint_t blkcnt,
 		       void *buffer)
-#else
-static ulong scsi_read(struct blk_desc *block_dev, lbaint_t blknr,
-		       lbaint_t blkcnt, void *buffer)
-#endif
 {
-#ifdef CONFIG_BLK
 	struct blk_desc *block_dev = dev_get_uclass_platdata(dev);
 	struct udevice *bdev = dev->parent;
-#else
-	struct udevice *bdev = NULL;
-#endif
 	lbaint_t start, blks;
 	uintptr_t buf_addr;
 	unsigned short smallblks = 0;
@@ -216,20 +207,11 @@ static ulong scsi_read(struct blk_desc *block_dev, lbaint_t blknr,
 /* Almost the maximum amount of the scsi_ext command.. */
 #define SCSI_MAX_WRITE_BLK 0xFFFF
 
-#ifdef CONFIG_BLK
 static ulong scsi_write(struct udevice *dev, lbaint_t blknr, lbaint_t blkcnt,
 			const void *buffer)
-#else
-static ulong scsi_write(struct blk_desc *block_dev, lbaint_t blknr,
-			lbaint_t blkcnt, const void *buffer)
-#endif
 {
-#ifdef CONFIG_BLK
 	struct blk_desc *block_dev = dev_get_uclass_platdata(dev);
 	struct udevice *bdev = dev->parent;
-#else
-	struct udevice *bdev = NULL;
-#endif
 	lbaint_t start, blks;
 	uintptr_t buf_addr;
 	unsigned short smallblks;
@@ -449,10 +431,6 @@ static void scsi_init_dev_desc_priv(struct blk_desc *dev_desc)
 	dev_desc->product[0] = 0;
 	dev_desc->revision[0] = 0;
 	dev_desc->removable = false;
-#if !CONFIG_IS_ENABLED(BLK)
-	dev_desc->block_read = scsi_read;
-	dev_desc->block_write = scsi_write;
-#endif
 }
 
 #if !defined(CONFIG_DM_SCSI)
