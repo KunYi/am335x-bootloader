@@ -56,6 +56,18 @@ void setup_initiator_credentials(void)
 	writel(DMSC_QOS_PVU_CTX(2), DMSC_QOS_DSS_DMA_MAP + 6 * 4);
 	writel(DMSC_QOS_PVU_CTX(2), DMSC_QOS_DSS_DMA_MAP + 7 * 4);
 
+	/* GPU OS_id=0, chanid=[0-3] */
+	for (i = 0; i < 4; i++) {
+		writel(DMSC_QOS_PVU_CTX(2),
+			(volatile unsigned int *)DMSC_QOS_GPU_M0_RD_MAP + i);
+		writel(DMSC_QOS_PVU_CTX(2),
+			(volatile unsigned int *)DMSC_QOS_GPU_M0_WR_MAP + i);
+		writel(DMSC_QOS_PVU_CTX(2),
+			(volatile unsigned int *)DMSC_QOS_GPU_M1_RD_MAP + i);
+		writel(DMSC_QOS_PVU_CTX(2),
+			(volatile unsigned int *)DMSC_QOS_GPU_M1_WR_MAP + i);
+	}
+
 	/* Initiators for virtid=3 */
 	/* MMC0 */
 	writel(DMSC_QOS_PVU_CTX(3), DMSC_QOS_MMC0_RD_MAP);
@@ -65,8 +77,8 @@ void setup_initiator_credentials(void)
 	writel(DMSC_QOS_PVU_CTX(3), DMSC_QOS_DSS_DMA_MAP + 2 * 4);
 	writel(DMSC_QOS_PVU_CTX(3), DMSC_QOS_DSS_DMA_MAP + 3 * 4);
 
-	/* GPU OS_id=0, chanid=[0-3] */
-	for (i = 0; i < 4; i++) {
+	/* GPU OS_id=1, chanid=[4-7] */
+	for (i = 4; i < 8; i++) {
 		writel(DMSC_QOS_PVU_CTX(3),
 			(volatile unsigned int *)DMSC_QOS_GPU_M0_RD_MAP + i);
 		writel(DMSC_QOS_PVU_CTX(3),
