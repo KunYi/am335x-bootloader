@@ -56,8 +56,9 @@ config K3_AM654_DDRSS
 
 config K3_J721E_DDRSS
 	bool "Enable J721E DDRSS support"
-	depends on RAM && SOC_K3_J721E
+	depends on RAM
 	help
-	  DDR driver on J721E SoC.
+	  Enable support for the DDR memory controller for the J721E family
+	  of SoCs.
 
 source "drivers/ram/stm32mp1/Kconfig"

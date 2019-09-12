@@ -4,5 +4,6 @@
 #
 
 obj-$(CONFIG_K3_J721E_DDRSS) += lpddr4_ctl_regs_rw_masks.o
+obj-$(CONFIG_K3_J721E_DDRSS) += k3-j721e-ddrss.o
 obj-$(CONFIG_K3_J721E_DDRSS) += lpddr4_obj_if.o
 obj-$(CONFIG_K3_J721E_DDRSS) += lpddr4.o
