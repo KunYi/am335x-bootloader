@@ -715,7 +715,7 @@ int load_firmware(char *name_fw, u32 *loadaddr)
 	return size;
 }
 #else
-int load_firmware(char *name_fw, char *name_loadaddr, u32 *loadaddr)
+int load_firmware(char *name_fw, u32 *loadaddr)
 {
 	return 0;
 }
