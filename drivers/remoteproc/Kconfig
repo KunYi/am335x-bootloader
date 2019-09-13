@@ -83,11 +83,13 @@ config REMOTEPROC_TI_PRU
 	  Say 'y' here to add support for TI' K3 remoteproc driver.
 
 config REMOTEPROC_TI_IPU
-	bool "Support for TI's K3 based IPU remoteproc driver"
+	bool "Support for TI's DRA7xx IPU remoteproc driver"
 	select REMOTEPROC
+	depends on DRA7XX
 	depends on DM
 	depends on OF_CONTROL
 	help
-	  Say 'y' here to add support for TI' K3 remoteproc driver.
+	  Say 'y' here to add support for TI's Dual-Cortex M4 IPU remote
+	  processor subsystems present on DRA7xx and AM57xx family of SoCs.
 
 endmenu
