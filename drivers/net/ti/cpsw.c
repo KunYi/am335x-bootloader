@@ -1216,6 +1216,7 @@ static void cpsw_eth_of_parse_slave(struct cpsw_platform_data *data,
 		slave_data->phy_addr = phy_id[1];
 	}
 
+	slave_data->max_speed = 0;
 	max_speed = fdtdec_get_int(fdt, subnode,
 				   "max-speed", max_speed);
 	if (max_speed > 0)
