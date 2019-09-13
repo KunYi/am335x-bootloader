@@ -88,20 +88,21 @@ enum ipu_num {
 #define DRA7_RPROC_CMA_SIZE_DSP1             0x04000000
 #define DRA7_RPROC_CMA_SIZE_DSP2             0x00800000
 
+#define DRA7_PGTBL_BASE_IPU1                 0x95700000
+#define DRA7_PGTBL_BASE_IPU2                 0x95740000
+
 /*
- * The page table (32 KB) is placed at the end of the CMA reserved area.
- * It's possible that this location is needed by the firmware (in which
- * case the firmware is using pretty much *all* of the reserved area), but
- * there doesn't seem to be a better location to place it.
- *
- * We only need 16 KB memory for the page table if we are using all 1
- * MB sections.  There might be cases where we need to allocate memory
- * at a lower granularity.  For these cases, we are allocating 16 KB
- * additional memory.
+ * The memory for the page tables (256 KB per IPU) is placed just before
+ * the carveout memories for the remote processors. 16 KB of memory is
+ * needed for the L1 page table (4096 entries * 4 bytes per 1 MB section).
+ * Any smaller page (64 KB or 4 KB) entries are supported through L2 page
+ * tables (1 KB per table). The remaining 240 KB can provide support for
+ * 240 L2 page tables. Any remoteproc firmware image requiring more than
+ * 240 L2 page table entries would need more memory to be reserved.
  */
 #define PAGE_TABLE_SIZE_L1 (0x00004000)
 #define PAGE_TABLE_SIZE_L2 (0x400)
-#define MAX_NUM_L2_PAGE_TABLES (16)
+#define MAX_NUM_L2_PAGE_TABLES (240)
 #define PAGE_TABLE_SIZE_L2_TOTAL (MAX_NUM_L2_PAGE_TABLES * PAGE_TABLE_SIZE_L2)
 #define PAGE_TABLE_SIZE (PAGE_TABLE_SIZE_L1 + (PAGE_TABLE_SIZE_L2_TOTAL))
 
@@ -603,7 +604,7 @@ struct rproc ipu1_config = {
 	.num_iommus = 1,
 	.cma_base = DRA7_RPROC_CMA_BASE_IPU1,
 	.cma_size = DRA7_RPROC_CMA_SIZE_IPU1,
-	.page_table_addr = 0,
+	.page_table_addr = DRA7_PGTBL_BASE_IPU1,
 	.mmu_base_addr = {0x58882000, 0},
 	.load_addr = IPU1_LOAD_ADDR,
 	.core_name = "IPU1",
@@ -617,7 +618,7 @@ struct rproc ipu2_config = {
 	.num_iommus = 1,
 	.cma_base = DRA7_RPROC_CMA_BASE_IPU2,
 	.cma_size = DRA7_RPROC_CMA_SIZE_IPU2,
-	.page_table_addr = 0,
+	.page_table_addr = DRA7_PGTBL_BASE_IPU2,
 	.mmu_base_addr = {0x55082000, 0},
 	.load_addr = IPU2_LOAD_ADDR,
 	.core_name = "IPU2",
@@ -649,12 +650,6 @@ u32 spl_pre_boot_core(struct udevice *dev, u32 core_id)
 		cfg->has_rsc_table = 1;
 	else
 		cfg->has_rsc_table = 0;
-
-	/*
-	 * Calculate the page table address
-	 */
-	cfg->page_table_addr =
-	    cfg->cma_base + cfg->cma_size - (PAGE_TABLE_SIZE);
 
 	/*
 	 * Configure the MMU
