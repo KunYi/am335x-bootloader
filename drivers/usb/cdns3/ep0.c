@@ -57,7 +57,9 @@ static void cdns3_ep0_run_transfer(struct cdns3_device *priv_dev,
 
 	/* Flush both TRBs */
 	flush_dcache_range((unsigned long)priv_ep->trb_pool,
-			   sizeof(struct cdns3_trb) * 2);
+			   (unsigned long)priv_ep->trb_pool +
+			   ROUND(sizeof(struct cdns3_trb) * 2,
+				 CONFIG_SYS_CACHELINE_SIZE));
 
 	trace_cdns3_prepare_trb(priv_ep, priv_ep->trb_pool);
 
@@ -283,7 +285,9 @@ static int cdns3_req_ep0_get_status(struct cdns3_device *priv_dev,
 
 	/* Flush setup response */
 	flush_dcache_range((unsigned long)priv_dev->setup_buf,
-			   sizeof(struct usb_ctrlrequest));
+			   (unsigned long)priv_dev->setup_buf +
+			   ROUND(sizeof(struct usb_ctrlrequest),
+				 CONFIG_SYS_CACHELINE_SIZE));
 
 	cdns3_ep0_run_transfer(priv_dev, priv_dev->setup_dma,
 			       sizeof(*response_pkt), 1, 0);
@@ -601,7 +605,9 @@ static void cdns3_transfer_completed(struct cdns3_device *priv_dev)
 
 		/* Invalidate TRB before accessing it */
 		invalidate_dcache_range((unsigned long)priv_ep->trb_pool,
-					sizeof(struct cdns3_trb));
+					(unsigned long)priv_ep->trb_pool +
+					ROUND(sizeof(struct cdns3_trb),
+					      CONFIG_SYS_CACHELINE_SIZE));
 
 		request->actual =
 			TRB_LEN(le32_to_cpu(priv_ep->trb_pool->length));
