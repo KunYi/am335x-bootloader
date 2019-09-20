@@ -4,18 +4,7 @@
  */
 
 #include "omap5-u-boot.dtsi"
-
-/ {
-	chosen {
-		firmware-loader = &fs_loader0;
-	};
-
-	fs_loader0: fs_loader@0 {
-		u-boot,dm-pre-reloc;
-		compatible = "u-boot,fs-loader";
-		phandlepart = <&mmc1 1>;
-	};
-};
+#include "dra7-ipu-common-early-boot.dtsi"
 
 &pcf_gpio_21{
 	u-boot,i2c-offset-len = <0>;
@@ -42,63 +31,5 @@
 };
 
 &mmc2_iodelay_hs200_rev20_conf {
-	u-boot,dm-spl;
-};
-
-&timer3 {
-	u-boot,dm-spl;
-};
-
-&timer4 {
-	u-boot,dm-spl;
-};
-
-&timer7 {
-	u-boot,dm-spl;
-};
-
-&timer8 {
-	u-boot,dm-spl;
-};
-
-&timer9 {
-	u-boot,dm-spl;
-};
-
-&timer11 {
-	u-boot,dm-spl;
-};
-
-&mmu_ipu1 {
-	u-boot,dm-spl;
-};
-
-&mmu_ipu2 {
-	u-boot,dm-spl;
-};
-
-&ipu1 {
-	status = "okay";
-	u-boot,dm-spl;
-};
-
-&ipu2 {
-	status = "okay";
-	u-boot,dm-spl;
-};
-
-&l4_wkup {
-	u-boot,dm-spl;
-};
-
-&prm {
-	u-boot,dm-spl;
-};
-
-&ipu1_rst {
-	u-boot,dm-spl;
-};
-
-&ipu2_rst {
 	u-boot,dm-spl;
 };
