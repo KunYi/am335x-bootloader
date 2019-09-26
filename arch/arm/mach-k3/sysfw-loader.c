@@ -153,15 +153,6 @@ static void k3_sysfw_configure_using_fit(void *fit,
 		hang();
 	}
 
-	/* Extract resource management (RM) specific configuration from FIT */
-	ret = fit_get_data_by_name(fit, images, SYSFW_CFG_RM,
-				   &cfg_fragment_addr, &cfg_fragment_size);
-	if (ret < 0) {
-		printf("Error accessing %s node in FIT (%d)\n", SYSFW_CFG_RM,
-		       ret);
-		hang();
-	}
-
 	/*
 	 * Now that all clocks and PM aspects are setup, invoke a user-
 	 * provided callback function. Usually this callback would be used
@@ -170,6 +161,15 @@ static void k3_sysfw_configure_using_fit(void *fit,
 	 */
 	if (config_pm_done_callback)
 		config_pm_done_callback();
+
+	/* Extract resource management (RM) specific configuration from FIT */
+	ret = fit_get_data_by_name(fit, images, SYSFW_CFG_RM,
+				   &cfg_fragment_addr, &cfg_fragment_size);
+	if (ret < 0) {
+		printf("Error accessing %s node in FIT (%d)\n", SYSFW_CFG_RM,
+		       ret);
+		hang();
+	}
 
 	/* Apply resource management (RM) configuration to SYSFW */
 	ret = board_ops->board_config_rm(ti_sci,
