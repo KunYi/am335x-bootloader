@@ -153,6 +153,19 @@ int do_board_detect(void)
 	return ret;
 }
 
+int checkboard(void)
+{
+	struct ti_am6_eeprom *ep = TI_AM6_EEPROM_DATA;
+
+	if (do_board_detect())
+		/* EEPROM not populated */
+		printf("Board: %s rev %s\n", "J721EX-PM1-SOM", "E2");
+	else
+		printf("Board: %s rev %s\n", ep->name, ep->version);
+
+	return 0;
+}
+
 static void setup_board_eeprom_env(void)
 {
 	char *name = "J721EX-PM2-SOM";
@@ -312,7 +325,7 @@ static int probe_daughtercards(void)
 		if (strncmp(ep.name, ext_cards[i].card_name, sizeof(ep.name)))
 			continue;
 
-		printf("detected %s\n", ext_cards[i].card_name);
+		printf("Detected: %s rev %s\n", ep.name, ep.version);
 		daughter_card_detect_flags[i] = true;
 
 #ifndef CONFIG_SPL_BUILD
