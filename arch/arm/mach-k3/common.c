@@ -20,6 +20,8 @@
 #include <fs.h>
 #include <environment.h>
 #include <elf.h>
+#include <asm/hardware.h>
+#include <asm/io.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -296,5 +298,45 @@ void reinit_mmc_device(int dev)
 	/* force a reinit of the MMC/SDCard */
 	mmc->has_init = 0;
 	mmc_init(mmc);
+}
+#endif
+
+#if defined(CONFIG_DISPLAY_CPUINFO)
+int print_cpuinfo(void)
+{
+	u32 soc, rev;
+	char *name;
+
+	soc = (readl(CTRLMMR_WKUP_JTAG_DEVICE_ID) &
+		DEVICE_ID_FAMILY_MASK) >> DEVICE_ID_FAMILY_SHIFT;
+	rev = (readl(CTRLMMR_WKUP_JTAG_ID) &
+		JTAG_ID_VARIANT_MASK) >> JTAG_ID_VARIANT_SHIFT;
+
+	printf("SoC:   ");
+	switch (soc) {
+	case AM654:
+		name = "AM654";
+		break;
+	case J721E:
+		name = "J721E";
+		break;
+	default:
+		name = "Unknown Silicon";
+	};
+
+	printf("%s PG ", name);
+	switch (rev) {
+	case REV_PG1_0:
+		name = "1.0";
+		break;
+	case REV_PG2_0:
+		name = "2.0";
+		break;
+	default:
+		name = "Unknown Revision";
+	};
+	printf("%s\n", name);
+
+	return 0;
 }
 #endif
