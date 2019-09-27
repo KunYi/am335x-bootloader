@@ -215,7 +215,7 @@ static ulong scsi_write(struct udevice *dev, lbaint_t blknr, lbaint_t blkcnt,
 {
 	struct blk_desc *block_dev = dev_get_uclass_platdata(dev);
 	struct udevice *bdev = dev->parent;
-	struct scsi_platdata *uc_plat = dev_get_uclass_priv(bdev);
+	struct scsi_platdata *uc_plat = dev_get_uclass_platdata(bdev);
 	lbaint_t start, blks, max_blks;
 	uintptr_t buf_addr;
 	unsigned short smallblks;
