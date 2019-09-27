@@ -158,6 +158,7 @@ void board_init_f(ulong dummy)
 	setup_am654_navss_northbridge();
 
 #ifdef CONFIG_CPU_V7R
+	disable_linefill_optimization();
 	setup_k3_mpu_regions();
 
 	/*
