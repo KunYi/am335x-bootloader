@@ -580,7 +580,8 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	spl_set_bd();
 
 #if !(defined(CONFIG_SYS_ICACHE_OFF) && defined(CONFIG_SYS_DCACHE_OFF)) && \
-		(defined(CONFIG_CPU_V7A) || defined(CONFIG_ARM64))
+	(defined(CONFIG_CPU_V7A) || defined(CONFIG_ARM64) ||	\
+	 defined(CONFIG_CPU_V7R))
 	dram_init_banksize();
 	reserve_mmu();
 	enable_caches();
