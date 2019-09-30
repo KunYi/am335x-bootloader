@@ -280,7 +280,7 @@ void dm_mux_init(void)
 			if (ret)
 				debug("unable to probe device %s\n", dev->name);
 		} else {
-			printf("not found for dev %s\n", dev->name);
+			dev_info(dev, "not found for dev %s\n", dev->name);
 		}
 	}
 }
