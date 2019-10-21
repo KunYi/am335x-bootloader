@@ -64,3 +64,4 @@ obj-$(CONFIG_VEXPRESS_CONFIG) += vexpress_config.o
 obj-$(CONFIG_WINBOND_W83627) += winbond_w83627.o
 obj-$(CONFIG_JZ4780_EFUSE) += jz4780_efuse.o
 obj-$(CONFIG_ESM_K3) += k3_esm.o
+obj-$(CONFIG_ESM_PMIC) += esm_pmic.o
