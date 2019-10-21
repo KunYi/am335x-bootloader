@@ -241,7 +241,8 @@ void board_init_f(ulong dummy)
 	int offset;
 	u32 val, dflt = 0;
 #endif
-#if defined(CONFIG_K3_J721E_DDRSS) || defined(CONFIG_K3_LOAD_SYSFW)
+#if defined(CONFIG_K3_J721E_DDRSS) || defined(CONFIG_K3_LOAD_SYSFW) || \
+	defined(CONFIG_ESM_K3) || defined(CONFIG_ESM_PMIC)
 	struct udevice *dev;
 	int ret;
 #endif
@@ -334,6 +335,20 @@ void board_init_f(ulong dummy)
 	ret = uclass_get_device(UCLASS_AVS, 0, &dev);
 	if (ret)
 		printf("AVS init failed: %d\n", ret);
+#endif
+
+#ifdef CONFIG_ESM_K3
+	ret = uclass_get_device_by_driver(UCLASS_MISC, DM_GET_DRIVER(k3_esm),
+					  &dev);
+	if (ret)
+		printf("MISC init failed: %d\n", ret);
+#endif
+
+#ifdef CONFIG_ESM_PMIC
+	ret = uclass_get_device_by_driver(UCLASS_MISC, DM_GET_DRIVER(pmic_esm),
+					  &dev);
+	if (ret)
+		printf("ESM PMIC init failed: %d\n", ret);
 #endif
 
 #if defined(CONFIG_K3_J721E_DDRSS)
