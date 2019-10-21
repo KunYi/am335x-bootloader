@@ -204,3 +204,7 @@
 &usb_serdes_mux {
 	u-boot,mux-autoprobe;
 };
+
+&main_esm {
+	u-boot,dm-spl;
+};
