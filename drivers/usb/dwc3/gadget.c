@@ -226,6 +226,9 @@ void dwc3_gadget_giveback(struct dwc3_ep *dep, struct dwc3_request *req,
 {
 	struct dwc3			*dwc = dep->dwc;
 
+	if (!req)
+		return;
+
 	if (req->queued) {
 		dep->busy_slot++;
 		/*
