@@ -120,8 +120,10 @@ static struct dwc3_event_buffer *dwc3_alloc_one_event_buffer(struct dwc3 *dwc,
 	evt->length	= length;
 	evt->buf	= dma_alloc_coherent(length,
 					     (unsigned long *)&evt->dma);
-	if (!evt->buf)
+	if (!evt->buf) {
+		devm_kfree(dwc->dev, evt);
 		return ERR_PTR(-ENOMEM);
+	}
 
 	dwc3_flush_cache((uintptr_t)evt->buf, evt->length);
 
