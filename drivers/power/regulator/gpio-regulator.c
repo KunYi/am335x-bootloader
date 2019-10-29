@@ -32,6 +32,7 @@ static int gpio_regulator_ofdata_to_platdata(struct udevice *dev)
 	int node = dev_of_offset(dev);
 	int ret, count, i, j;
 	u32 states_array[8];
+	ulong flags;
 
 	dev_pdata = dev_get_platdata(dev);
 	uc_pdata = dev_get_uclass_platdata(dev);
@@ -40,6 +41,9 @@ static int gpio_regulator_ofdata_to_platdata(struct udevice *dev)
 
 	/* Set type to gpio */
 	uc_pdata->type = REGULATOR_TYPE_GPIO;
+	flags = GPIOD_IS_OUT;
+	if (uc_pdata->boot_on)
+		flags |= GPIOD_IS_OUT_ACTIVE;
 
 	/*
 	 * Get gpio regulator gpio desc
@@ -49,7 +53,7 @@ static int gpio_regulator_ofdata_to_platdata(struct udevice *dev)
 	 * gpios is presnt
 	 */
 	gpio = &dev_pdata->gpio;
-	ret = gpio_request_by_name(dev, "gpios", 0, gpio, GPIOD_IS_OUT);
+	ret = gpio_request_by_name(dev, "gpios", 0, gpio, flags);
 	if (ret)
 		debug("regulator gpio - not found! Error: %d", ret);
 
