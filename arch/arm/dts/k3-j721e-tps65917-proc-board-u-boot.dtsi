@@ -203,3 +203,35 @@
 &usb_serdes_mux {
 	u-boot,mux-autoprobe;
 };
+
+&tps65917 {
+	u-boot,dm-spl;
+};
+
+&tps65917_pmic {
+	u-boot,dm-spl;
+};
+
+&tps65917_regulators {
+	u-boot,dm-spl;
+};
+
+&ldo1_reg {
+	u-boot,dm-spl;
+};
+
+&evm_12v0 {
+	u-boot,dm-spl;
+};
+
+&vsys_3v3 {
+	u-boot,dm-spl;
+};
+
+&vsys_5v0 {
+	u-boot,dm-spl;
+};
+
+&vdd_mmc1 {
+	u-boot,dm-spl;
+};

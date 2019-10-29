@@ -208,3 +208,7 @@
 &main_esm {
 	u-boot,dm-spl;
 };
+
+&main_gpio0 {
+	u-boot,dm-spl;
+};
