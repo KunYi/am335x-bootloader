@@ -364,7 +364,9 @@
 		dma-coherent;
 		ti,strobe-sel = <0x77>;
 		mmc-ddr-1_8v;
+		mmc-hs200-1_8v;
 		mmc-hs400-1_8v;
+		sdhci-caps-mask = <0x2 0x0>;
 	};
 
 	main_sdhci1: sdhci@4fb0000 {
@@ -379,6 +381,7 @@
 		ti,otap-del-sel = <0x2>;
 		ti,trm-icp = <0x8>;
 		dma-coherent;
+		sdhci-caps-mask = <0x2 0x0>;
 	};
 
 	main_r5fss0: r5fss@5c00000 {
