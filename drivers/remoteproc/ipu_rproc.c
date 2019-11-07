@@ -771,13 +771,14 @@ static int ipu_probe(struct udevice *dev)
 	cfg = rproc_cfg_arr[priv->id];
 	loadaddr = cfg->load_addr;
 	size = load_firmware(cfg->firmware_name, &loadaddr);
-	if (!size) {
+	if (size <= 0) {
 		dev_err(dev, "Firmware loading failed\n");
 		return -EINVAL;
 	}
 
 	INIT_LIST_HEAD(&priv->mappings);
-	spl_pre_boot_core(dev, priv->id);
+	if (spl_pre_boot_core(dev, priv->id))
+		return -EINVAL;
 
 	return 0;
 }
