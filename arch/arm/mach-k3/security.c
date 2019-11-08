@@ -31,8 +31,14 @@ void board_fit_image_post_process(void **p_image, size_t *p_size)
 	proc_ops = &ti_sci->ops.proc_ops;
 
 	image_addr = (uintptr_t)*p_image;
+	image_size = *p_size;
 
 	debug("Authenticating image at address 0x%016llx\n", image_addr);
+	debug("Authenticating image of size %d bytes\n", image_size);
+
+	flush_dcache_range((unsigned long)image_addr,
+			   ALIGN((unsigned long)image_addr + image_size,
+				 ARCH_DMA_MINALIGN));
 
 	/* Authenticate image */
 	ret = proc_ops->proc_auth_boot_image(ti_sci, &image_addr, &image_size);
