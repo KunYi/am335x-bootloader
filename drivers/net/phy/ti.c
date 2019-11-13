@@ -151,6 +151,11 @@ int phy_read_mmd_indirect(struct phy_device *phydev, int prtad,
 	return value;
 }
 
+int phy_readext(struct phy_device *phydev, int addr, int devad, int reg)
+{
+	return phy_read_mmd_indirect(phydev, reg, devad, addr);
+}
+
 /**
  * phy_write_mmd_indirect - writes data to the MMD registers
  * @phydev: The PHY device
@@ -181,6 +186,13 @@ void phy_write_mmd_indirect(struct phy_device *phydev, int prtad,
 
 	/* Write the data into MMD's selected register */
 	phy_write(phydev, addr, MII_MMD_DATA, data);
+}
+
+int phy_writeext(struct phy_device *phydev, int addr, int devad, int reg,
+		 u16 val)
+{
+	phy_write_mmd_indirect(phydev, reg, devad, addr, val);
+	return 0;
 }
 
 static int dp83867_config_port_mirroring(struct phy_device *phydev)
@@ -425,6 +437,8 @@ static struct phy_driver DP83867_driver = {
 	.config = &dp83867_config,
 	.startup = &genphy_startup,
 	.shutdown = &genphy_shutdown,
+	.readext = phy_readext,
+	.writeext = phy_writeext,
 };
 
 int phy_ti_init(void)
