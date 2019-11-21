@@ -15,23 +15,11 @@
 	};
 };
 
-&timer3 {
-	u-boot,dm-spl;
-};
-
-&timer4 {
-	u-boot,dm-spl;
-};
-
 &timer7 {
 	u-boot,dm-spl;
 };
 
 &timer8 {
-	u-boot,dm-spl;
-};
-
-&timer9 {
 	u-boot,dm-spl;
 };
 
@@ -43,16 +31,7 @@
 	u-boot,dm-spl;
 };
 
-&mmu_ipu2 {
-	u-boot,dm-spl;
-};
-
 &ipu1 {
-	status = "okay";
-	u-boot,dm-spl;
-};
-
-&ipu2 {
 	status = "okay";
 	u-boot,dm-spl;
 };
@@ -66,9 +45,5 @@
 };
 
 &ipu1_rst {
-	u-boot,dm-spl;
-};
-
-&ipu2_rst {
 	u-boot,dm-spl;
 };
