@@ -4,4 +4,3 @@
  */
 
 #include "omap5-u-boot.dtsi"
-#include "dra7-ipu-common-early-boot.dtsi"
