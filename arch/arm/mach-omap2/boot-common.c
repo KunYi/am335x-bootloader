@@ -224,25 +224,6 @@ void spl_boot_ipu(void)
 		goto skip_ipu;
 	}
 
-	ret = rproc_dev_init(1);
-	if (ret) {
-		debug("%s: IPU2 failed to initialize on rproc (%d)\n", __func__,
-		      ret);
-		goto skip_ipu;
-	}
-
-	ret = rproc_load(1, IPU2_LOAD_ADDR, 0x2000000);
-	if (ret) {
-		debug("%s: IPU2 failed to load on rproc (%d)\n", __func__,
-		      ret);
-		goto skip_ipu;
-	}
-
-	debug("Starting IPU2...\n");
-
-	ret = rproc_start(1);
-	if (ret)
-		debug("%s: IPU2 failed to start (%d)\n", __func__, ret);
 skip_ipu:
 
 	return;
