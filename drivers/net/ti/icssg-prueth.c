@@ -82,6 +82,7 @@ enum pruss_pru_id {
 struct prueth {
 	struct udevice		*dev;
 	struct regmap		*miig_rt;
+	struct regmap		*mii_rt;
 	fdt_addr_t		mdio_base;
 	phys_addr_t		pruss_shrdram2;
 	phys_addr_t		tmaddr;
@@ -103,6 +104,85 @@ struct prueth {
 	u32			rx_pend;
 	int			slice;
 };
+
+/**
+ * TX IPG Values to be set for 100M and 1G link speeds.  These values are
+ * in ocp_clk cycles. So need change if ocp_clk is changed for a specific
+ * h/w design.
+ */
+#define MII_RT_TX_IPG_100M	0x166
+#define MII_RT_TX_IPG_1G	0x18
+
+#define RGMII_CFG_OFFSET	4
+
+/* Constant to choose between MII0 and MII1 */
+#define ICSS_MII0	0
+#define ICSS_MII1	1
+
+/* RGMII CFG Register bits */
+#define RGMII_CFG_GIG_EN_MII0	BIT(17)
+#define RGMII_CFG_GIG_EN_MII1	BIT(21)
+#define RGMII_CFG_FULL_DUPLEX_MII0	BIT(18)
+#define RGMII_CFG_FULL_DUPLEX_MII1	BIT(22)
+
+/* PRUSS_MII_RT Registers */
+#define PRUSS_MII_RT_RXCFG0		0x0
+#define PRUSS_MII_RT_RXCFG1		0x4
+#define PRUSS_MII_RT_TXCFG0		0x10
+#define PRUSS_MII_RT_TXCFG1		0x14
+#define PRUSS_MII_RT_TX_CRC0		0x20
+#define PRUSS_MII_RT_TX_CRC1		0x24
+#define PRUSS_MII_RT_TX_IPG0		0x30
+#define PRUSS_MII_RT_TX_IPG1		0x34
+#define PRUSS_MII_RT_PRS0		0x38
+#define PRUSS_MII_RT_PRS1		0x3c
+#define PRUSS_MII_RT_RX_FRMS0		0x40
+#define PRUSS_MII_RT_RX_FRMS1		0x44
+#define PRUSS_MII_RT_RX_PCNT0		0x48
+#define PRUSS_MII_RT_RX_PCNT1		0x4c
+#define PRUSS_MII_RT_RX_ERR0		0x50
+#define PRUSS_MII_RT_RX_ERR1		0x54
+
+static inline void icssg_update_rgmii_cfg(struct regmap *miig_rt, bool gig_en,
+					  bool full_duplex, int mii)
+{
+	u32 gig_en_mask, gig_val = 0, full_duplex_mask, full_duplex_val = 0;
+
+	gig_en_mask = (mii == ICSS_MII0) ? RGMII_CFG_GIG_EN_MII0 :
+					RGMII_CFG_GIG_EN_MII1;
+	if (gig_en)
+		gig_val = gig_en_mask;
+	regmap_update_bits(miig_rt, RGMII_CFG_OFFSET, gig_en_mask, gig_val);
+
+	full_duplex_mask = (mii == ICSS_MII0) ? RGMII_CFG_FULL_DUPLEX_MII0 :
+					   RGMII_CFG_FULL_DUPLEX_MII1;
+	if (full_duplex)
+		full_duplex_val = full_duplex_mask;
+	regmap_update_bits(miig_rt, RGMII_CFG_OFFSET, full_duplex_mask,
+			   full_duplex_val);
+}
+
+static inline void icssg_update_mii_rt_cfg(struct regmap *mii_rt, int speed,
+					   int mii)
+{
+	u32 ipg_reg, val;
+
+	ipg_reg = (mii == ICSS_MII0) ? PRUSS_MII_RT_TX_IPG0 :
+				       PRUSS_MII_RT_TX_IPG1;
+	switch (speed) {
+	case SPEED_1000:
+		val = MII_RT_TX_IPG_1G;
+		break;
+	case SPEED_100:
+		val = MII_RT_TX_IPG_100M;
+		break;
+	default:
+		/* Other links speeds not supported */
+		pr_err("Unsupported link speed\n");
+		return;
+	}
+	regmap_write(mii_rt, ipg_reg, val);
+}
 
 static int icssg_phy_init(struct udevice *dev)
 {
@@ -160,6 +240,34 @@ static void icssg_config_set(struct prueth *prueth)
 	memcpy_toio(va, &prueth->config[0], sizeof(prueth->config[0]));
 }
 
+static int icssg_update_link(struct prueth *priv)
+{
+	struct phy_device *phy = priv->phydev;
+	bool gig_en = false, full_duplex = false;
+
+	if (phy->link) { /* link up */
+		if (phy->speed == 1000)
+			gig_en = true;
+		if (phy->duplex == 0x1)
+			full_duplex = true;
+		if (phy->speed == 100)
+			gig_en = false;
+		/* Set the RGMII cfg for gig en and full duplex */
+		icssg_update_rgmii_cfg(priv->miig_rt, gig_en, full_duplex,
+				       priv->slice);
+		/* update the Tx IPG based on 100M/1G speed */
+		icssg_update_mii_rt_cfg(priv->mii_rt, phy->speed, priv->slice);
+
+		printf("link up on port %d, speed %d, %s duplex\n",
+		       priv->port_id, phy->speed,
+		       (phy->duplex == DUPLEX_FULL) ? "full" : "half");
+	} else {
+		printf("link down on port %d\n", priv->port_id);
+	}
+
+	return phy->link;
+}
+
 static int prueth_start(struct udevice *dev)
 {
 	struct prueth *priv = dev_get_priv(dev);
@@ -210,7 +318,16 @@ static int prueth_start(struct udevice *dev)
 		goto phy_fail;
 	}
 
+	ret = icssg_update_link(priv);
+	if (!ret) {
+		ret = -ENODEV;
+		goto phy_shut;
+	}
+
 	return 0;
+
+phy_shut:
+	phy_shutdown(priv->phydev);
 phy_fail:
 	dma_disable(&priv->dma_rx);
 rx_fail:
@@ -427,6 +544,12 @@ static int prueth_probe(struct udevice *dev)
 	prueth->miig_rt = syscon_regmap_lookup_by_phandle(dev, "mii-g-rt");
 	if (!prueth->miig_rt) {
 		dev_err(dev, "couldn't get mii-g-rt syscon regmap\n");
+		return -ENODEV;
+	}
+
+	prueth->mii_rt = syscon_regmap_lookup_by_phandle(dev, "mii-rt");
+	if (!prueth->mii_rt) {
+		dev_err(dev, "couldn't get mii-rt syscon regmap\n");
 		return -ENODEV;
 	}
 
