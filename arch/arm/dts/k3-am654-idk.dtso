@@ -38,6 +38,7 @@
 					"ti-pruss/am65x-pru1-prueth-fw.elf",
 					"ti-pruss/am65x-rtu1-prueth-fw.elf";
 			mii-g-rt = <&icssg0_mii_g_rt>;
+			mii-rt = <&icssg0_mii_rt>;
 			dma-coherent;
 			dmas = <&mcu_udmap &icssg0 0 UDMA_DIR_TX>, /* egress slice 0 */
 			       <&mcu_udmap &icssg0 1 UDMA_DIR_TX>, /* egress slice 0 */
@@ -94,6 +95,7 @@
 					"ti-pruss/am65x-pru1-prueth-fw.elf",
 					"ti-pruss/am65x-rtu1-prueth-fw.elf";
 			mii-g-rt = <&icssg1_mii_g_rt>;
+			mii-rt = <&icssg1_mii_rt>;
 			dma-coherent;
 			dmas = <&mcu_udmap &icssg1 0 UDMA_DIR_TX>, /* egress slice 0 */
 			       <&mcu_udmap &icssg1 1 UDMA_DIR_TX>, /* egress slice 0 */
