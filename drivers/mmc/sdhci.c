@@ -573,33 +573,35 @@ static void sdhci_set_voltage(struct sdhci_host *host)
 
 	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
 
-	if (IS_SD(host->mmc)) {
-		switch (mmc->signal_voltage) {
-		case MMC_SIGNAL_VOLTAGE_330:
-			if (mmc->vqmmc_supply) {
-				regulator_set_enable(mmc->vqmmc_supply, false);
-				regulator_set_value(mmc->vqmmc_supply, 3300000);
-				regulator_set_enable(mmc->vqmmc_supply, true);
-			}
+	switch (mmc->signal_voltage) {
+	case MMC_SIGNAL_VOLTAGE_330:
+		if (mmc->vqmmc_supply) {
+			regulator_set_enable(mmc->vqmmc_supply, false);
+			regulator_set_value(mmc->vqmmc_supply, 3300000);
+			regulator_set_enable(mmc->vqmmc_supply, true);
+		}
 
-			mdelay(5);
+		mdelay(5);
+		if (IS_SD(mmc)) {
 			ctrl &= ~SDHCI_CTRL_VDD_180;
 			sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-			break;
-		case MMC_SIGNAL_VOLTAGE_180:
-			if (mmc->vqmmc_supply) {
-				regulator_set_enable(mmc->vqmmc_supply, false);
-				regulator_set_value(mmc->vqmmc_supply, 1800000);
-				regulator_set_enable(mmc->vqmmc_supply, true);
-			}
+		}
+		break;
+	case MMC_SIGNAL_VOLTAGE_180:
+		if (mmc->vqmmc_supply) {
+			regulator_set_enable(mmc->vqmmc_supply, false);
+			regulator_set_value(mmc->vqmmc_supply, 1800000);
+			regulator_set_enable(mmc->vqmmc_supply, true);
+		}
 
+		if (IS_SD(mmc)) {
 			ctrl |= SDHCI_CTRL_VDD_180;
 			sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-			break;
-		default:
-			/* No signal voltage switch required */
-			return;
 		}
+		break;
+	default:
+		/* No signal voltage switch required */
+		return;
 	}
 }
 #else
