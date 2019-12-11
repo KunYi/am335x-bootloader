@@ -41,8 +41,8 @@
 			cdns,fifo-depth = <256>;
 			cdns,fifo-width = <4>;
 			cdns,trigger-address = <0x50000000>;
-			clocks = <&k3_clks 55 5>;
-			power-domains = <&k3_pds 55 TI_SCI_PD_EXCLUSIVE>;
+			clocks = <&k3_clks 248 0>;
+			power-domains = <&k3_pds 248 TI_SCI_PD_EXCLUSIVE>;
 			#address-cells = <1>;
 			#size-cells = <0>;
 			status = "disabled";
@@ -56,8 +56,8 @@
 			cdns,fifo-depth = <256>;
 			cdns,fifo-width = <4>;
 			cdns,trigger-address = <0x58000000>;
-			clocks = <&k3_clks 55 16>;
-			power-domains = <&k3_pds 55 TI_SCI_PD_EXCLUSIVE>;
+			clocks = <&k3_clks 249 6>;
+			power-domains = <&k3_pds 249 TI_SCI_PD_EXCLUSIVE>;
 			#address-cells = <1>;
 			#size-cells = <0>;
 			status = "disabled";
