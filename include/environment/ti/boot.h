@@ -60,6 +60,9 @@
 
 #define DEFAULT_COMMON_BOOT_TI_ARGS \
 	"console=" CONSOLEDEV ",115200n8\0" \
+	"setconsole=" \
+		"if $board_name=am5729_beaglebonai;" \
+		"then setenv console ttyS0,115200; fi;" \
 	"fdtfile=undefined\0" \
 	"bootpart=0:2\0" \
 	"bootdir=/boot\0" \
@@ -115,6 +118,8 @@
 			"setenv fdtfile am57xx-beagle-x15-revb1.dtb; fi;" \
 		"if test $board_name = beagle_x15_revc; then " \
 			"setenv fdtfile am57xx-beagle-x15-revc.dtb; fi;" \
+		"if test $board_name = am5729_beagleboneai; then " \
+			"setenv fdtfile am5729-beagleboneai.dtb; fi;" \
 		"if test $board_name = am572x_idk && test $idk_lcd = no; then " \
 			"setenv fdtfile am572x-idk.dtb; fi;" \
 		"if test $board_name = am572x_idk && test $idk_lcd = osd101t2045; then " \
@@ -153,6 +158,7 @@
 	"run mmcboot;" \
 	"run emmc_linux_boot; " \
 	"run emmc_android_boot; " \
+	"run setconsole;" \
 	""
 
 #endif /* CONFIG_OMAP54XX */
