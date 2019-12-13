@@ -958,6 +958,9 @@ struct prcm_regs const dra7xx_prcm = {
 	.cm_l4per_i2c3_clkctrl			= 0x4a0097b0,
 	.cm_l4per_i2c4_clkctrl			= 0x4a0097b8,
 	.cm_l4per_l4per_clkctrl			= 0x4a0097c0,
+	.cm_l4per_gptimer13_clkctrl		= 0x4a0097c8,
+	.cm_l4per_gptimer14_clkctrl		= 0x4a0097d0,
+	.cm_l4per_gptimer15_clkctrl		= 0x4a0097d8,
 	.cm_l4per_mcspi1_clkctrl		= 0x4a0097f0,
 	.cm_l4per_mcspi2_clkctrl		= 0x4a0097f8,
 	.cm_l4per_mcspi3_clkctrl		= 0x4a009800,
@@ -966,6 +969,7 @@ struct prcm_regs const dra7xx_prcm = {
 	.cm_l4per_gpio8_clkctrl			= 0x4a009818,
 	.cm_l4per_mmcsd3_clkctrl		= 0x4a009820,
 	.cm_l4per_mmcsd4_clkctrl		= 0x4a009828,
+	.cm_l4per_gptimer16_clkctrl		= 0x4a009830,
 	.cm_l4per_qspi_clkctrl			= 0x4a009838,
 	.cm_l4per_uart1_clkctrl			= 0x4a009840,
 	.cm_l4per_uart2_clkctrl			= 0x4a009848,
@@ -1017,9 +1021,11 @@ struct prcm_regs const dra7xx_prcm = {
 	.cm_l3main1_tptc1_clkctrl               = 0x4a008778,
 	.cm_l3main1_tptc2_clkctrl               = 0x4a008780,
 
-	/* cm1.abe */
-	.cm1_abe_timer7_clkctrl = 0x4a005568,
-	.cm1_abe_timer8_clkctrl = 0x4a005570,
+	/* cm.ipu: reuse cm1.abe definitions */
+	.cm1_abe_timer5_clkctrl			= 0x4a005558,
+	.cm1_abe_timer6_clkctrl			= 0x4a005560,
+	.cm1_abe_timer7_clkctrl			= 0x4a005568,
+	.cm1_abe_timer8_clkctrl			= 0x4a005570,
 };
 
 void clrset_spare_register(u8 spare_type, u32 clear_bits, u32 set_bits)

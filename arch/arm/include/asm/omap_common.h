@@ -261,6 +261,9 @@ struct prcm_regs {
 	u32 cm_l4per_i2c3_clkctrl;
 	u32 cm_l4per_i2c4_clkctrl;
 	u32 cm_l4per_l4per_clkctrl;
+	u32 cm_l4per_gptimer13_clkctrl;
+	u32 cm_l4per_gptimer14_clkctrl;
+	u32 cm_l4per_gptimer15_clkctrl;
 	u32 cm_l4per_mcasp2_clkctrl;
 	u32 cm_l4per_mcasp3_clkctrl;
 	u32 cm_l4per_mgate_clkctrl;
@@ -272,6 +275,7 @@ struct prcm_regs {
 	u32 cm_l4per_gpio8_clkctrl;
 	u32 cm_l4per_mmcsd3_clkctrl;
 	u32 cm_l4per_mmcsd4_clkctrl;
+	u32 cm_l4per_gptimer16_clkctrl;
 	u32 cm_l4per_msprohg_clkctrl;
 	u32 cm_l4per_slimbus2_clkctrl;
 	u32 cm_l4per_qspi_clkctrl;
