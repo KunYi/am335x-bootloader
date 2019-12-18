@@ -303,7 +303,7 @@ static int prueth_start(struct udevice *dev)
 	ret = dma_enable(&priv->dma_tx);
 	if (ret) {
 		dev_err(dev, "TX dma_enable failed %d\n", ret);
-		return ret;
+		goto tx_fail;
 	}
 
 	ret = dma_enable(&priv->dma_rx);
@@ -330,8 +330,13 @@ phy_shut:
 	phy_shutdown(priv->phydev);
 phy_fail:
 	dma_disable(&priv->dma_rx);
+	dma_free(&priv->dma_rx);
 rx_fail:
 	dma_disable(&priv->dma_tx);
+	dma_free(&priv->dma_tx);
+
+tx_fail:
+	icssg_class_disable(priv->miig_rt, priv->slice);
 
 	return ret;
 }
