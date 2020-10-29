@@ -1,0 +1,6 @@
+SRG3352 IoT Gateway 
+M:	KunYi <kunyi.chen@gmail.com>
+S:	Maintained
+F:	board/aaeon/srg3352/
+F:	include/configs/srg3352.h
+F:	configs/srg3352_defconfig

@@ -213,6 +213,33 @@ config TARGET_PDU001
 	  The PDU001 is a processor and display unit developed around
 	  the Computing-Module m2 from bytes at work AG.
 
+config TARGET_SRG3352
+	bool "Support SRG3352"
+	select BOARD_LATE_INIT
+	select DM
+	select DM_GPIO
+	select DM_SERIAL
+	imply CMD_DM
+	imply CMD_MMC
+	imply SPL_DM
+	imply SPL_DM_SEQ_ALIAS
+	imply SPL_ENV_SUPPORT
+	imply SPL_EXT_SUPPORT
+	imply SPL_FAT_SUPPORT
+	imply SPL_GPIO_SUPPORT
+	imply SPL_I2C_SUPPORT
+	imply SPL_LIBDISK_SUPPORT
+	imply SPL_MMC_SUPPORT
+	imply SPL_OF_LIBFDT
+	imply SPL_POWER_SUPPORT
+	imply SPL_SEPARATE_BSS
+	imply SPL_SERIAL_SUPPORT
+	imply SPL_SYS_MALLOC_SIMPLE
+	imply SPL_WATCHDOG_SUPPORT
+	imply SPL_YMODEM_SUPPORT
+	help
+	  Suppoer for AAEON SRG3352 family IoT Gateway
+
 endchoice
 
 endif

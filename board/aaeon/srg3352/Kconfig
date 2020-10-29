@@ -1,0 +1,25 @@
+
+if TARGET_SRG3352
+config SYS_BOARD
+	default "srg3352"
+
+config SYS_VENDOR
+	default "aaeon"
+
+config SYS_SOC
+	default "am33xx"
+
+config SYS_CONFIG_NAME
+	default "srg3352"
+
+config EEPROM_BUS_ADDRESS
+	int "Board EEPROM's I2C bus address"
+	range 0 8
+	default 0
+
+config EEPROM_CHIP_ADDRESS
+	hex "Board EEPROM's I2C chip address"
+	range 0 0xff
+	default 0x57
+
+endif
