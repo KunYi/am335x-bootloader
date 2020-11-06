@@ -121,7 +121,6 @@
 		"done\0"                                                  \
 	\
 	"scan_dev_for_boot="                                              \
-		"echo debug -- scan_dev_for_boot"                           \
 		"echo Scanning ${devtype} "                               \
 				"${devnum}:${distro_bootpart}...; "       \
 		"for prefix in ${boot_prefixes}; do "                     \
@@ -144,7 +143,6 @@
 	BOOT_TARGET_DEVICES(BOOTENV_DEV)                                  \
 	\
 	"distro_bootcmd="                       \
-		"echo debug -- run distro_bootcmd; " \
 		"for target in ${boot_targets}; do "                      \
 			"run bootcmd_${target}; "                         \
 		"done\0"
@@ -157,17 +155,14 @@
 	"mmcdev=0\0" \
 	"mmcrootfstype=ext4 rootwait\0" \
 	"finduuid=" \
-		"echo debug -- run finduuid; " \
-		"mmc dev ${devnum}; mmc part;"	\
+		"mmc dev ${devnum};"	\
 		"setexpr rootpart ${distro_bootpart} + 1;" \
-		"part uuid mmc ${devnum}:${rootpart} uuid;" \
-		"echo debug -- rootpart:${rootpart} uuid: ${uuid}\0" \
+		"part uuid mmc ${devnum}:${rootpart} uuid;\0" \
 	"args_mmc=run finduuid;setenv bootargs console=${console} " \
 		"${optargs} " \
 		"root=PARTUUID=${uuid} rw " \
 		"rootfstype=${mmcrootfstype}\0" \
 	"loadbootscript="\
-		"echo debug -- run loadbootscrip; " \
 		"load mmc ${mmcdev} ${loadaddr} ${bootdir}/boot.scr\0" \
 	"bootscript=echo Running bootscript from mmc${mmcdev} ...; " \
 		"source ${loadaddr}\0" \
@@ -175,12 +170,10 @@
 	"importbootenv=echo Importing environment from mmc${mmcdev} ...; " \
 		"env import -t ${loadaddr} ${filesize}\0" \
 	"loadbootenv=" \
-		"echo debug -- run loadbootenv;" \
 		"load mmc ${mmcdev} ${loadaddr} ${bootenvfile}\0" \
 	"loadimage=load ${devtype} ${bootpart} ${loadaddr} ${bootdir}/${bootfile}\0" \
 	"loadfdt=load ${devtype} ${bootpart} ${fdtaddr} ${bootdir}/${fdtfile}\0" \
 	"envboot=" \
-		"echo debug -- run envboot, mmcdev:${mmcdev};" \
 		"mmc dev ${mmcdev}; " \
 		"if mmc rescan; then " \
 			"echo SD/MMC found on device ${mmcdev};" \
@@ -198,7 +191,6 @@
 			"fi;" \
 		"fi;\0" \
 	"mmcloados= " \
-		"echo debug -- run mmcloados;" \
 		"run args_mmc; " \
 		"if test ${boot_fdt} = yes || test ${boot_fdt} = try; then " \
 			"if run loadfdt; then " \
@@ -214,7 +206,6 @@
 			"bootz; " \
 		"fi;\0" \
 	"mmcboot=" \
-		"echo debug -- run mmcboot;" \
 		"mmc dev ${mmcdev}; " \
 		"setenv devnum ${mmcdev}; " \
 		"setenv devtype mmc; " \
